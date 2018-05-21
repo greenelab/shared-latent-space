@@ -10,6 +10,8 @@ class dataInfo(dataSetInfoAbstract):
 
     def __init__(self):
         self.name = "ICVL"
+        self.Xdim = 60
+        self.Ydim = 80
 
     def load(self):
 
@@ -110,38 +112,38 @@ class dataInfo(dataSetInfoAbstract):
     def visualize(self, randIndexes, rightDomain, right_decoded_imgs, rightToLeftCycle,
                   right_generatedImgs, leftToRightImgs,
                   leftDomain, left_decoded_imgs, leftToRightCycle,
-                  left_generatedImgs, rightToLeftImgs, Xdim, YDim, params):
+                  left_generatedImgs, rightToLeftImgs, params):
         n = 10  # how many images we will display
         plt.figure(figsize=(120, 40))
         for i in range(n):
 
             # display original Depth Map
             ax = plt.subplot(5, n, i + 1)
-            plt.imshow(rightDomain[randIndexes[i]].reshape(Xdim, YDim))
+            plt.imshow(rightDomain[randIndexes[i]].reshape(self.Xdim, self.Ydim))
             ax.get_xaxis().set_visible(False)
             ax.get_yaxis().set_visible(False)
 
             # display depth map reconstruction
             ax = plt.subplot(5, n, i + 1 + n)
-            plt.imshow(right_decoded_imgs[randIndexes[i]].reshape(Xdim, YDim))
+            plt.imshow(right_decoded_imgs[randIndexes[i]].reshape(self.Xdim, self.Ydim))
             ax.get_xaxis().set_visible(False)
             ax.get_yaxis().set_visible(False)
 
             # display right to left transformed cycled through
             ax = plt.subplot(5, n, i + 1 + 2 * n)
-            plt.imshow(rightToLeftCycle[randIndexes[i]].reshape(Xdim, YDim))
+            plt.imshow(rightToLeftCycle[randIndexes[i]].reshape(self.Xdim, self.Ydim))
             ax.get_xaxis().set_visible(False)
             ax.get_yaxis().set_visible(False)
 
             # display depth generated
             ax = plt.subplot(5, n, i + 1 + 3 * n)
-            plt.imshow(right_generatedImgs[randIndexes[i]].reshape(Xdim, YDim))
+            plt.imshow(right_generatedImgs[randIndexes[i]].reshape(self.Xdim, self.Ydim))
             ax.get_xaxis().set_visible(False)
             ax.get_yaxis().set_visible(False)
 
             # display left to right transformed
             ax = plt.subplot(5, n, i + 1 + 4 * n)
-            plt.imshow(leftToRightImgs[randIndexes[i]].reshape(Xdim, YDim))
+            plt.imshow(leftToRightImgs[randIndexes[i]].reshape(self.Xdim, self.Ydim))
             ax.get_xaxis().set_visible(False)
             ax.get_yaxis().set_visible(False)
         # save the output
