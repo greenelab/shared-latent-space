@@ -1,12 +1,20 @@
 class model_parameters(object):
 
-    def __init__(self, batchSize, numEpochs, firstLayerSize,
-                 secondLayerSize, thirdLayerSize, encodedSize,
-                 inputSize):
+    def __init__(self, batchSize, numEpochs, firstLayerSizeLeft, 
+                 inputSizeLeft, thirdLayerSize, secondLayerSize,
+                 encodedSize, firstLayerSizeRight, 
+                 inputSizeRight, dataSetInfo):
         self.batchSize = batchSize
         self.numEpochs = numEpochs
-        self.firstLayerSize = firstLayerSize
+        self.firstLayerSizeLeft = firstLayerSizeLeft
+        self.inputSizeLeft = inputSizeLeft
+
         self.secondLayerSize = secondLayerSize
         self.thirdLayerSize = thirdLayerSize
         self.encodedSize = encodedSize
-        self.inputSize = inputSize
+
+        self.firstLayerSizeRight = firstLayerSizeRight
+
+        self.inputSizeRight = inputSizeRight
+
+        self.dataSetInfo = dataSetInfo
