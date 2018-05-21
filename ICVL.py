@@ -1,10 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from model_objects import model_parameters
-from skimage.transform import resize
-from scipy import misc
 from DataSetInfoAbstractClass import dataSetInfoAbstract
 import seaborn as sns
+import cPickle
+
 
 class dataInfo(dataSetInfoAbstract):
 
@@ -13,36 +13,12 @@ class dataInfo(dataSetInfoAbstract):
 
     def load(self):
 
-        with open("Data/ICVL_Data/Training/Annotation_Training.csv", "r") as openfileobject:
-            temp = [openfileobject.readline().strip().split(',')]
-            for line in openfileobject:
-                temp.append(line.strip().split(','))
+        with open("Data/ICVL_Data/Training/ICVL_Training.pkl", "rb") as openfileobject:
+            (x_train, a_train) = cPickle.load(openfileobject)
 
-        x_train = np.array(temp).astype('float32')
-        print x_train.shape
-
-        x_train = np.array(x_train).astype('float32')
-        x_train = x_train + abs(np.min(x_train))
-        x_train = x_train / np.max(x_train)
-
-        import os
-        output = []
-        for filename in sorted(os.listdir('Data/ICVL_Data/Training/depth/')):
-            filename = 'Data/ICVL_Data/Training/depth/' + filename
-            temp = misc.imread(filename)
-            temp = resize(temp, (temp.shape[0] / 4, temp.shape[1] / 4))
-            temp = np.array(temp)
-            temp = temp.flatten()
-
-            output.append(temp)
-
-        a_train = np.array(output).astype('float32') / np.max(output)
-        print a_train.shape
-
-        x_test = x_train
-        a_test = a_train
-
-        return (x_test, a_train, x_test, a_test)
+        with open("Data/ICVL_Data/Testing/ICVL_Testing.pkl", "rb") as openfileobject:
+            (x_test, a_test) = cPickle.load(openfileobject)
+        return (x_train, a_train, x_test, a_test)
 
     def draw_hands(self, Xs, Ys):
         plt.scatter(Xs, Ys)

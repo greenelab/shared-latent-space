@@ -20,6 +20,7 @@ from model_objects import model_parameters
 import ICVL
 import MNIST
 
+
 class shared_vae_class(object):
 
     def __init__(self, model_parameters):
@@ -35,7 +36,8 @@ class shared_vae_class(object):
             return z_mean + K.exp(z_log_sigma) * epsilon
 
         # Loss function for the VAE
-        # Loss function comprised of two parts, Cross_entropy, and divergense
+        # Loss function comprised of two parts, Cross_entropy, and
+        # divergense
         def vae_loss(inputs, finalLayer):
             reconstruction_loss = K.sum(K.square(finalLayer - inputs))
             kl_loss = - 0.5 * K.sum(1 + z_log_sigmaFull - K.square(
@@ -44,7 +46,8 @@ class shared_vae_class(object):
             return total_loss
 
         # Loss function for the left VAE
-        # Loss function comprised of two parts, Cross_entropy, and divergense
+        # Loss function comprised of two parts, Cross_entropy, and
+        # divergense
         def left_vae_loss(inputs, finalLayer):
             reconstruction_loss = K.sum(K.square(finalLayer - inputs))
             kl_loss = - 0.5 * K.sum(1 + z_log_sigmaLeft - K.square(
@@ -53,7 +56,8 @@ class shared_vae_class(object):
             return total_loss
 
         # Loss function for the right VAE
-        # Loss function comprised of two parts, Cross_entropy, and divergense
+        # Loss function comprised of two parts, Cross_entropy, and
+        # divergense
         def right_vae_loss(inputs, finalLayer):
             reconstruction_loss = K.sum(K.square(finalLayer - inputs))
             kl_loss = - 0.5 * K.sum(1 + z_log_sigmaRight - K.square(
@@ -82,7 +86,8 @@ class shared_vae_class(object):
         # These different merge branches are used in different models
         mergedLayer = keras.layers.average([leftMerge, rightMerge])
         leftMergedLayer = keras.layers.average([leftMerge, leftMerge])
-        rightMergedLayer = keras.layers.average([rightMerge, rightMerge])
+        rightMergedLayer = keras.layers.average(
+            [rightMerge, rightMerge])
 
         z_mean = Dense(self.params.encodedSize)
         z_log_sigma = Dense(self.params.encodedSize)
@@ -104,7 +109,8 @@ class shared_vae_class(object):
         # These are the three different models
         leftEncoder = Model(leftEncoderInput, zLeft)
         rightEncoder = Model(rightEncoderInput, zRight)
-        self.fullEncoder = Model([leftEncoderInput, rightEncoderInput], zFull)
+        self.fullEncoder = Model(
+            [leftEncoderInput, rightEncoderInput], zFull)
 
         # Defining the Decoder with Left and Right Outputs
         decoderInputs = Input(shape=(self.params.encodedSize,))
@@ -146,7 +152,8 @@ class shared_vae_class(object):
         outputs = self.fullDecoder(self.fullEncoder(
             [leftEncoderInput, rightEncoderInput]))
         # Create the full model
-        self.vae_model = Model([leftEncoderInput, rightEncoderInput], outputs)
+        self.vae_model = Model(
+            [leftEncoderInput, rightEncoderInput], outputs)
         lowLearnAdam = keras.optimizers.Adam(
             lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
         self.vae_model.compile(optimizer=lowLearnAdam,
@@ -179,12 +186,14 @@ class shared_vae_class(object):
         # Left VAE model which can't train middle
         outputs = leftDeocder(leftEncoder(leftEncoderInput))
         self.leftModel = Model(leftEncoderInput, outputs)
-        self.leftModel.compile(optimizer=lowLearnAdam, loss=left_vae_loss)
+        self.leftModel.compile(
+            optimizer=lowLearnAdam, loss=left_vae_loss)
 
         # Right VAE model which can't train middle
         outputs = rightDecoder(rightEncoder(rightEncoderInput))
         self.rightModel = Model(rightEncoderInput, outputs)
-        self.rightModel.compile(optimizer=lowLearnAdam, loss=right_vae_loss)
+        self.rightModel.compile(
+            optimizer=lowLearnAdam, loss=right_vae_loss)
 
         # Make shared layers trainable
         leftMerge.trainable = True
@@ -234,9 +243,10 @@ class shared_vae_class(object):
             optimizer=lowLearnAdam, loss=vae_loss)  # Compile
 
         plot_model(self.fullEncoder, to_file="Output/" + str(self.params.dataSetInfo.name) + "/sharedVaeFullEncoder" +
-                    str(self.params.numEpochs) + '_' +
-                   str(self.params.firstLayerSizeLeft) + '_' + str(self.params.inputSizeLeft) + '_'
-                   + str(self.params.secondLayerSize) + '_' + str(self.params.thirdLayerSize)+ '_' +
+                   str(self.params.numEpochs) + '_' +
+                   str(self.params.firstLayerSizeLeft) + '_' +
+                   str(self.params.inputSizeLeft) + '_'
+                   + str(self.params.secondLayerSize) + '_' + str(self.params.thirdLayerSize) + '_' +
                    str(self.params.encodedSize) + '_' + str(self.params.firstLayerSizeRight) +
                    '_' + str(self.params.inputSizeRight)
                    + '.png', show_shapes=True)
@@ -298,10 +308,12 @@ class shared_vae_class(object):
         (left_generatedImgs, right_generatedImgs) = self.fullDecoder.predict(rng)
 
         # Create Left to Right Transformation
-        (left_decoded_imgs, leftToRightImgs) = self.leftToRightModel.predict(leftDomain)
+        (left_decoded_imgs, leftToRightImgs) = self.leftToRightModel.predict(
+            leftDomain)
 
         # Create Right to Left Transformation
-        (rightToLeftImgs, right_decoded_imgs) = self.rightToLeftModel.predict(rightDomain)
+        (rightToLeftImgs, right_decoded_imgs) = self.rightToLeftModel.predict(
+            rightDomain)
 
         # Create the cycle images
         (leftToRightCycle, _) = self.rightToLeftModel.predict(leftToRightImgs)
@@ -309,18 +321,21 @@ class shared_vae_class(object):
 
         randIndexes = np.random.randint(0, rightDomain.shape[0], (10,))
 
-    
+        # Visualize the Data if Applicable
         self.params.dataSetInfo.visualize(randIndexes, rightDomain, right_decoded_imgs, rightToLeftCycle, right_generatedImgs, leftToRightImgs,
-                  leftDomain, left_decoded_imgs, leftToRightCycle, left_generatedImgs, rightToLeftImgs, 60, 80, self.params)
+                                          leftDomain, left_decoded_imgs, leftToRightCycle, left_generatedImgs, rightToLeftIgms, 60, 80, self.params)
 
+        # Find the Difference in the cycles
         leftCycleDifference = left_decoded_imgs - leftToRightCycle
         rightCycleDifference = right_decoded_imgs - rightToLeftCycle
 
+        # Print Average Cycle Differences
         print("Left Cycle Difference: " +
               repr(np.sum(leftCycleDifference) / leftDomain.shape[0]))
         print("Right Cycle Difference: " +
               repr(np.sum(rightCycleDifference) / leftDomain.shape[0]))
 
+        # Create Noise
         leftRandomNoise = np.random.normal(
             loc=0.0, scale=1.0, size=leftDomain.shape)
 

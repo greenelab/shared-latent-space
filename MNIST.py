@@ -5,6 +5,8 @@ from scipy import misc
 from keras.datasets import mnist
 from DataSetInfoAbstractClass import dataSetInfoAbstract
 import seaborn as sns
+import cPickle
+
 
 class dataInfo(dataSetInfoAbstract):
 
@@ -13,27 +15,11 @@ class dataInfo(dataSetInfoAbstract):
 
     def load(self):
         # Loading the MNIST Data
-        (x_train, _), (x_test, _) = mnist.load_data()
+        with open("Data/MNIST_Data/Training/MNIST_Training.pkl", "rb") as openfileobject:
+            (x_train, a_train) = cPickle.load(openfileobject)
 
-        # Formating the MNIST Data
-        x_train = x_train.astype('float32') / 255.
-        x_train = x_train.reshape((len(x_train), np.prod(x_train.shape[1:])))
-
-        # Formating the MNIST Data
-        x_test = x_test.astype('float32') / 255.
-        x_test = x_test.reshape((len(x_test), np.prod(x_test.shape[1:])))
-
-        # Making Copies of the Data to creat Inverses
-        import copy
-
-        a_train = copy.copy(x_train)
-        for i in range(len(a_train)):
-            a_train[i] = 1 - a_train[i]
-
-        a_test = copy.copy(x_test)
-        for i in range(len(a_test)):
-            a_test[i] = 1 - a_test[i]
-
+            with open("Data/MNIST_Data/Testing/MNIST_Testing.pkl", "rb") as openfileobject:
+                (x_test, a_test) = cPickle.load(openfileobject)
         return (x_train, a_train, x_test, a_test)
 
     def visualize(self, randIndexes, rightDomain, right_decoded_imgs, rightToLeftCycle, right_generatedImgs, leftToRightImgs,
