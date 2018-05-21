@@ -323,7 +323,7 @@ class shared_vae_class(object):
 
         # Visualize the Data if Applicable
         self.params.dataSetInfo.visualize(randIndexes, rightDomain, right_decoded_imgs, rightToLeftCycle, right_generatedImgs, leftToRightImgs,
-                                          leftDomain, left_decoded_imgs, leftToRightCycle, left_generatedImgs, rightToLeftIgms, 60, 80, self.params)
+                                          leftDomain, left_decoded_imgs, leftToRightCycle, left_generatedImgs, rightToLeftImgs, 60, 80, self.params)
 
         # Find the Difference in the cycles
         leftCycleDifference = left_decoded_imgs - leftToRightCycle
