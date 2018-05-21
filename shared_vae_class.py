@@ -20,7 +20,6 @@ from model_objects import model_parameters
 import ICVL
 import MNIST
 
-
 class shared_vae_class(object):
 
     def __init__(self, model_parameters):
@@ -149,7 +148,7 @@ class shared_vae_class(object):
         # Create the full model
         self.vae_model = Model([leftEncoderInput, rightEncoderInput], outputs)
         lowLearnAdam = keras.optimizers.Adam(
-            lr=0.00005, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
+            lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
         self.vae_model.compile(optimizer=lowLearnAdam,
                                loss=vae_loss)  # Compile
         # vae_model.summary()
@@ -234,11 +233,10 @@ class shared_vae_class(object):
         self.centerModel.compile(
             optimizer=lowLearnAdam, loss=vae_loss)  # Compile
 
-        plot_model(self.fullEncoder, to_file="Output/" + str(self.params.numEpochs) +
-                   '_' + str(self.params.dataSetInfo.name) + "/sharedVaeFullEncoder" +
-                   str(self.params.firstLayerSizeLeft) + '_' +
-                   str(self.params.inputSizeLeft) + '_'
-                   + str(self.params.thirdLayerSize) + '_' + str(self.params.secondLayerSize) + '_' +
+        plot_model(self.fullEncoder, to_file="Output/" + str(self.params.dataSetInfo.name) + "/sharedVaeFullEncoder" +
+                    str(self.params.numEpochs) + '_' +
+                   str(self.params.firstLayerSizeLeft) + '_' + str(self.params.inputSizeLeft) + '_'
+                   + str(self.params.secondLayerSize) + '_' + str(self.params.thirdLayerSize)+ '_' +
                    str(self.params.encodedSize) + '_' + str(self.params.firstLayerSizeRight) +
                    '_' + str(self.params.inputSizeRight)
                    + '.png', show_shapes=True)
@@ -311,8 +309,9 @@ class shared_vae_class(object):
 
         randIndexes = np.random.randint(0, rightDomain.shape[0], (10,))
 
+    
         self.params.dataSetInfo.visualize(randIndexes, rightDomain, right_decoded_imgs, rightToLeftCycle, right_generatedImgs, leftToRightImgs,
-                                          leftDomain, left_decoded_imgs, leftToRightCycle, left_generatedImgs, rightToLeftImgs, 60, 80, self.params)
+                  leftDomain, left_decoded_imgs, leftToRightCycle, left_generatedImgs, rightToLeftImgs, 60, 80, self.params)
 
         leftCycleDifference = left_decoded_imgs - leftToRightCycle
         rightCycleDifference = right_decoded_imgs - rightToLeftCycle

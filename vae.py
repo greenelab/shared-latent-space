@@ -213,9 +213,9 @@ for i in range(len(x_test_noisy)):
 '''
 
 
-firstLayerSize = 48
-secondLayerSize = 36
-encodedSize = 16
+firstLayerSize = 84
+secondLayerSize = 48
+encodedSize = 2
 
 
 # Define Encoder
@@ -283,7 +283,7 @@ randIndexes = np.random.randint(0, x_train.shape[0], (10,))
 
 
 n = 10  # how many digits we will display
-plt.figure(figsize=(120, 40))
+plt.figure()
 for i in range(n):
     Xs = np.array(x_train[randIndexes[i]][0::3])
     Ys = np.array(x_train[randIndexes[i]][1::3])

@@ -4,7 +4,7 @@ from model_objects import model_parameters
 from skimage.transform import resize
 from scipy import misc
 from DataSetInfoAbstractClass import dataSetInfoAbstract
-
+import seaborn as sns
 
 class dataInfo(dataSetInfoAbstract):
 
@@ -165,7 +165,7 @@ class dataInfo(dataSetInfoAbstract):
             ax.get_xaxis().set_visible(False)
             ax.get_yaxis().set_visible(False)
         plt.savefig('Output/ICVL/Right_' + str(params.numEpochs) + '_' + str(params.firstLayerSizeLeft) + '_' + str(params.inputSizeLeft) + '_'
-                    + str(params.thirdLayerSize) + '_' + str(params.secondLayerSize) + '_' +
+                    + str(params.secondLayerSize) + '_' + str(params.thirdLayerSize) + '_' +
                     str(params.encodedSize) + '_' + str(params.firstLayerSizeRight) +
                     '_' + str(params.inputSizeRight)
                     + '.png')
@@ -211,7 +211,7 @@ class dataInfo(dataSetInfoAbstract):
             ax.get_xaxis().set_visible(False)
             ax.get_yaxis().set_visible(False)
         plt.savefig('Output/ICVL/Left' + str(params.numEpochs) + '_' + str(params.firstLayerSizeLeft) + '_' + str(params.inputSizeLeft) + '_'
-                    + str(params.thirdLayerSize) + '_' + str(params.secondLayerSize) + '_' +
+                    + str(params.secondLayerSize) + '_' + str(params.thirdLayerSize) + '_' +
                     str(params.encodedSize) + '_' + str(params.firstLayerSizeRight) +
                     '_' + str(params.inputSizeRight)
                     + '.png')
