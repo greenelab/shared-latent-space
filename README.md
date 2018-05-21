@@ -1,9 +1,9 @@
-### The Motivation of Shared Latent Space Variational Auto Encoders
+# The Motivation of Shared Latent Space Variational Auto Encoders
 ## In Biology
 Shared Latent Space VAE's find relationships between two different domains and allow for transformations between the two. This has especially useful implications in biology, where you may be able to have predictions of how certain tests will look based on ones you already possess. 
 
 
-### Files Usage
+# Files
 
 ## main_file.py
 This is the file which should be called. It handles calling other files for loading and formating data. It also calls upon shared_vae_class.py to create the model, train it, and generate data. As work continues, this file will become more general and easier to work with. As of now, if you are using your own data, you should create a file for it which impliments the DataSetInfoAbstract abtract class. Then create it in the file and the file should know how to interact with it.
@@ -23,11 +23,12 @@ This is a specific implimentation of the DataSetInfoAbstract abstract class for 
 ##MNIST.py
 This is a specific implimentation of the DataSetInfoAbstract abstract class for the MNIST data. It contains a load function which loads the data from a pickle file as well as a visualize function which produces images of the regular MNIST digits and the inverse MNIST digits.
 
-###Running the Model
+# Usage
+##Running the Model
 The pickle files for MNIST and ICVL are both too big to include on the repo. They are publically available and I will later provide an easy way to download them that will be consistent among platforms. You should consider changing the layout of the model, which is controlled in the intialization of the model_parameters object in main_file.py. You can also control the noise leve as a parameter to the train function also located inside main_file.py.
 
-###Changing Datasets
+##Changing Datasets
 If the data set is one of the already included datasets, you need to change which implementation of DataSetInfoAbstract is called when defining the DataSetInfo object. Additionally, you should consider changing the model layout, as outlined in Running the Model.
 
-###Adding More Datasets
+##Adding More Datasets
 If you want to add more Datasets, that is fully supported. Create your own implementation of the DataSetInfoAbstract abstract class including a method for loading and visualizing. You must return two training sets and two testing sets. You do not have to return anything for visualization, so it is merely sufficent to define the function and return nothing. Thus, you don't need to implement a visualization, but you must declare it to comply with the interface. 
