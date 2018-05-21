@@ -20,6 +20,8 @@ class dataInfo(dataSetInfoAbstract):
             (x_test, a_test) = cPickle.load(openfileobject)
         return (x_train, a_train, x_test, a_test)
 
+    # This file plots the lines for the various fingers. This is all hardcoded
+    # from the files
     def draw_hands(self, Xs, Ys):
         plt.scatter(Xs, Ys)
 
@@ -105,19 +107,21 @@ class dataInfo(dataSetInfoAbstract):
         linesEnd = np.array([Ys[15], Ys[20]])
         plt.plot(linesStart, linesEnd, 'b')
 
-    def visualize(self, randIndexes, rightDomain, right_decoded_imgs, rightToLeftCycle, right_generatedImgs, leftToRightImgs,
-                  leftDomain, left_decoded_imgs, leftToRightCycle, left_generatedImgs, rightToLeftImgs, Xdim, YDim, params):
-        n = 10  # how many digits we will display
+    def visualize(self, randIndexes, rightDomain, right_decoded_imgs, rightToLeftCycle,
+                  right_generatedImgs, leftToRightImgs,
+                  leftDomain, left_decoded_imgs, leftToRightCycle,
+                  left_generatedImgs, rightToLeftImgs, Xdim, YDim, params):
+        n = 10  # how many images we will display
         plt.figure(figsize=(120, 40))
         for i in range(n):
 
-            # display inv original
+            # display original Depth Map
             ax = plt.subplot(5, n, i + 1)
             plt.imshow(rightDomain[randIndexes[i]].reshape(Xdim, YDim))
             ax.get_xaxis().set_visible(False)
             ax.get_yaxis().set_visible(False)
 
-            # display inv reconstruction
+            # display depth map reconstruction
             ax = plt.subplot(5, n, i + 1 + n)
             plt.imshow(right_decoded_imgs[randIndexes[i]].reshape(Xdim, YDim))
             ax.get_xaxis().set_visible(False)
@@ -129,7 +133,7 @@ class dataInfo(dataSetInfoAbstract):
             ax.get_xaxis().set_visible(False)
             ax.get_yaxis().set_visible(False)
 
-            # display inv generated
+            # display depth generated
             ax = plt.subplot(5, n, i + 1 + 3 * n)
             plt.imshow(right_generatedImgs[randIndexes[i]].reshape(Xdim, YDim))
             ax.get_xaxis().set_visible(False)
@@ -140,14 +144,18 @@ class dataInfo(dataSetInfoAbstract):
             plt.imshow(leftToRightImgs[randIndexes[i]].reshape(Xdim, YDim))
             ax.get_xaxis().set_visible(False)
             ax.get_yaxis().set_visible(False)
-        plt.savefig('Output/ICVL/Right_' + str(params.numEpochs) + '_' + str(params.firstLayerSizeLeft) + '_' + str(params.inputSizeLeft) + '_'
+        # save the output
+        plt.savefig('Output/ICVL/Right_' + str(params.numEpochs) + '_'
+                    + str(params.firstLayerSizeLeft) + '_' +
+                    str(params.inputSizeLeft) + '_'
                     + str(params.secondLayerSize) + '_' + str(params.thirdLayerSize) + '_' +
                     str(params.encodedSize) + '_' + str(params.firstLayerSizeRight) +
                     '_' + str(params.inputSizeRight)
                     + '.png')
-        n = 10  # how many digits we will display
+
         plt.figure(figsize=(120, 40))
         for i in range(n):
+            # Display the knucle map
             Xs = np.array(leftDomain[randIndexes[i]][0::3])
             Ys = np.array(leftDomain[randIndexes[i]][1::3])
             ax = plt.subplot(5, n, i + 1)
@@ -155,7 +163,7 @@ class dataInfo(dataSetInfoAbstract):
             ax.get_xaxis().set_visible(False)
             ax.get_yaxis().set_visible(False)
 
-            # display inv reconstruction
+            # display knuckle map reconstruction
             ax = plt.subplot(5, n, i + 1 + n)
             Xs = np.array(left_decoded_imgs[randIndexes[i]][0::3])
             Ys = np.array(left_decoded_imgs[randIndexes[i]][1::3])
@@ -171,7 +179,7 @@ class dataInfo(dataSetInfoAbstract):
             ax.get_xaxis().set_visible(False)
             ax.get_yaxis().set_visible(False)
 
-            # display inv generated
+            # display generated knuckle map
             ax = plt.subplot(5, n, i + 1 + 3 * n)
             Xs = np.array(left_generatedImgs[randIndexes[i]][0::3])
             Ys = np.array(left_generatedImgs[randIndexes[i]][1::3])
@@ -186,7 +194,10 @@ class dataInfo(dataSetInfoAbstract):
             self.draw_hands(Xs, Ys)
             ax.get_xaxis().set_visible(False)
             ax.get_yaxis().set_visible(False)
-        plt.savefig('Output/ICVL/Left' + str(params.numEpochs) + '_' + str(params.firstLayerSizeLeft) + '_' + str(params.inputSizeLeft) + '_'
+        # Save the Output
+        plt.savefig('Output/ICVL/Left' + str(params.numEpochs) + '_'
+                    + str(params.firstLayerSizeLeft) + '_' +
+                    str(params.inputSizeLeft) + '_'
                     + str(params.secondLayerSize) + '_' + str(params.thirdLayerSize) + '_' +
                     str(params.encodedSize) + '_' + str(params.firstLayerSizeRight) +
                     '_' + str(params.inputSizeRight)
