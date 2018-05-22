@@ -3,3 +3,4 @@ Data/
 temp.py
 vae.py
 .pyc
+__pycache__/

@@ -17,7 +17,7 @@ if not os.path.exists("Output/" + dataSetInfo.name):
     os.mkdir("Output/" + dataSetInfo.name)
 # second layer size, third layer size, encoded size, input size
 model_parameters = model_parameters(
-    256, 1, 96, x_train.shape[1], 64, 32, 16, 1024, a_train.shape[1], dataSetInfo)
+    256, 1, 96, x_train.shape[1], 64, 48, 34, 1024, a_train.shape[1], dataSetInfo)
 
 # Create the model with the parameters
 shared_vae = shared_vae_class(model_parameters)

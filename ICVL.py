@@ -1,8 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from model_objects import model_parameters
-from DataSetInfoAbstractClass import dataSetInfoAbstract
-import seaborn as sns
+from DataSetInfoAbstractClass import dataSetInfoAbstract    
 import cPickle
 
 

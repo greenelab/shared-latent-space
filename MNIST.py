@@ -4,7 +4,6 @@ from model_objects import model_parameters
 from scipy import misc
 from keras.datasets import mnist
 from DataSetInfoAbstractClass import dataSetInfoAbstract
-import seaborn as sns
 import cPickle
 
 

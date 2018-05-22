@@ -24,6 +24,15 @@ This is a specific implimentation of the DataSetInfoAbstract abstract class for 
 This is a specific implimentation of the DataSetInfoAbstract abstract class for the MNIST data. It contains a load function which loads the data from a pickle file as well as a visualize function which produces images of the regular MNIST digits and the inverse MNIST digits.
 
 # Usage
+## Computational Environment
+All libraries and packages are handled by conda and specified in the `enviroment.yml` file. To build and activate this enviroment, run:
+```python
+#conda version 4.4.10
+conda env create --force --file enviroment.yml
+
+conda activate shared-latenet-space
+```
+
 ## Running the Model
 The pickle files for MNIST and ICVL are both too big to include on the repo. They are publically available and I will later provide an easy way to download them that will be consistent among platforms. You should consider changing the layout of the model, which is controlled in the intialization of the model_parameters object in main_file.py. You can also control the noise leve as a parameter to the train function also located inside main_file.py.
 
