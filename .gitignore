@@ -1,5 +1,5 @@
 Output/
-Data/
+*.pkl
 temp.py
 vae.py
 .pyc

@@ -8,6 +8,11 @@ Shared Latent Space VAE's find relationships between two different domains and a
 ### main_file.py
 This is the file which should be called. It handles calling other files for loading and formating data. It also calls upon shared_vae_class.py to create the model, train it, and generate data. As work continues, this file will become more general and easier to work with. As of now, if you are using your own data, you should create a file for it which impliments the DataSetInfoAbstract abtract class. Then create it in the file and the file should know how to interact with it.
 
+To run the file, open command line and enter:
+```
+python main_file.py
+```
+
 ### shared_vae_class.py
 This file is the main class which hold the model. It contains functions to compile, train, and generate from the model. The model will take in a series of parameters which control size of layers, etc. The model right now is very rigid in structure, but this may change. There a 5 different models built inside here for the purposes of training, but they are hidden. The generate function calls on the visualize function of the DataSetInfoAbstract class. This will produce an image to help visualize how the model is working.
 

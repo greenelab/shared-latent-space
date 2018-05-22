@@ -19,8 +19,8 @@ class dataInfo(dataSetInfoAbstract):
         with open("Data/MNIST_Data/Training/MNIST_Training.pkl", "rb") as openfileobject:
             (x_train, a_train) = cPickle.load(openfileobject)
 
-            with open("Data/MNIST_Data/Testing/MNIST_Testing.pkl", "rb") as openfileobject:
-                (x_test, a_test) = cPickle.load(openfileobject)
+        with open("Data/MNIST_Data/Testing/MNIST_Testing.pkl", "rb") as openfileobject:
+            (x_test, a_test) = cPickle.load(openfileobject)
         return (x_train, a_train, x_test, a_test)
 
     def visualize(self, randIndexes, rightDomain, right_decoded_imgs, rightToLeftCycle, right_generatedImgs, leftToRightImgs,
