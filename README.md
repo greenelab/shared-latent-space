@@ -26,7 +26,7 @@ This is a specific implimentation of the DataSetInfoAbstract abstract class for 
 # Usage
 ## Computational Environment
 All libraries and packages are handled by conda and specified in the `enviroment.yml` file. To build and activate this enviroment, run:
-```python
+```
 #conda version 4.4.10
 conda env create --force --file enviroment.yml
 
