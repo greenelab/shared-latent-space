@@ -6,18 +6,24 @@ import ICVL
 import MNIST
 import os
 
+from unpack_files import unpackFiles
+
 # MNIST 28x28
 # ICVL 60x80
 
-dataSetInfo = ICVL.dataInfo()
+dataSetInfo = MNIST.dataInfo()
+
+if not os.path.exists(os.path.join('Data', 'Training', '{}_Training.pkl'.format(dataSetInfo.name))):
+    unpackFiles(dataSetInfo.name)
 
 (x_train, a_train, x_test, a_test) = dataSetInfo.load()
+
 
 if not os.path.exists("Output/" + dataSetInfo.name):
     os.mkdir("Output/" + dataSetInfo.name)
 # second layer size, third layer size, encoded size, input size
 model_parameters = model_parameters(
-    256, 1, 96, x_train.shape[1], 64, 48, 34, 1024, a_train.shape[1], dataSetInfo)
+    256, 1, 512, x_train.shape[1], 64, 48, 34, 512, a_train.shape[1], dataSetInfo)
 
 # Create the model with the parameters
 shared_vae = shared_vae_class(model_parameters)
