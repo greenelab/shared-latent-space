@@ -2,5 +2,5 @@ Output/
 *.pkl
 temp.py
 vae.py
-.pyc
+*.pyc
 __pycache__/
