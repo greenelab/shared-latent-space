@@ -69,7 +69,7 @@ class shared_vae_class(object):
 
         # Loss function for the VAE
         # Loss function comprised of two parts, Cross_entropy, and
-        # divergense
+        # divergence
         def vae_loss(inputs, finalLayer):
             reconstruction_loss = K.sum(K.square(finalLayer - inputs))
             kl_loss = - 0.5 * K.sum(1 + z_log_sigmaFull - K.square(
@@ -79,7 +79,7 @@ class shared_vae_class(object):
 
         # Loss function for the left VAE
         # Loss function comprised of two parts, Cross_entropy, and
-        # divergense
+        # divergence
         def left_vae_loss(inputs, finalLayer):
             reconstruction_loss = K.sum(K.square(finalLayer - inputs))
             kl_loss = - 0.5 * K.sum(1 + z_log_sigmaLeft - K.square(
@@ -89,7 +89,7 @@ class shared_vae_class(object):
 
         # Loss function for the right VAE
         # Loss function comprised of two parts, Cross_entropy, and
-        # divergense
+        # divergence
         def right_vae_loss(inputs, finalLayer):
             reconstruction_loss = K.sum(K.square(finalLayer - inputs))
             kl_loss = - 0.5 * K.sum(1 + z_log_sigmaRight - K.square(

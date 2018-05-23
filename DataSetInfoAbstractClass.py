@@ -25,7 +25,7 @@ class dataSetInfoAbstract(object):
         Args: None
 
         Returns: (Float array, Float array, Float array, Float array)
-                    The left training data, left testing data,
+                    This should return left training data, left testing data,
                     right training data, right testing data
         """
         return

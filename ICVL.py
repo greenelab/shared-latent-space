@@ -79,85 +79,18 @@ class dataInfo(dataSetInfoAbstract):
 
         plt.gca().invert_yaxis()
 
-        linesStart = np.array([Xs[0], Xs[1]])
-        linesEnd = np.array([Ys[0], Ys[1]])
-        plt.plot(linesStart, linesEnd)
+        # These indices represent the various joints and colors
+        idxs = [(0, 1, 'k'), (1, 2, 'g'), (2, 3, 'g'), (3, 16, 'g'),
+                (0, 4, 'r'), (4, 5, 'r'), (5, 6, 'r'), (6, 17, 'r'),
+                (0, 7, 'm'), (7, 8, 'm'), (8, 9, 'm'), (9, 18, 'm'),
+                (0, 10, 'y'), (10, 11, 'y'), (11, 12, 'y'), (12, 19, 'y'),
+                (0, 13, 'b'), (13, 14, 'b'), (14, 15, 'b'), (15, 20, 'b')]
 
-        linesStart = np.array([Xs[1], Xs[2]])
-        linesEnd = np.array([Ys[1], Ys[2]])
-        plt.plot(linesStart, linesEnd, 'g')
-
-        linesStart = np.array([Xs[2], Xs[3]])
-        linesEnd = np.array([Ys[2], Ys[3]])
-        plt.plot(linesStart, linesEnd, 'g')
-
-        linesStart = np.array([Xs[3], Xs[16]])
-        linesEnd = np.array([Ys[3], Ys[16]])
-        plt.plot(linesStart, linesEnd, 'g')
-
-        linesStart = np.array([Xs[0], Xs[4]])
-        linesEnd = np.array([Ys[0], Ys[4]])
-        plt.plot(linesStart, linesEnd, 'r')
-
-        linesStart = np.array([Xs[4], Xs[5]])
-        linesEnd = np.array([Ys[4], Ys[5]])
-        plt.plot(linesStart, linesEnd, 'r')
-
-        linesStart = np.array([Xs[5], Xs[6]])
-        linesEnd = np.array([Ys[5], Ys[6]])
-        plt.plot(linesStart, linesEnd, 'r')
-
-        linesStart = np.array([Xs[6], Xs[17]])
-        linesEnd = np.array([Ys[6], Ys[17]])
-        plt.plot(linesStart, linesEnd, 'r')
-
-        linesStart = np.array([Xs[0], Xs[7]])
-        linesEnd = np.array([Ys[0], Ys[7]])
-        plt.plot(linesStart, linesEnd, 'm')
-
-        linesStart = np.array([Xs[7], Xs[8]])
-        linesEnd = np.array([Ys[7], Ys[8]])
-        plt.plot(linesStart, linesEnd, 'm')
-
-        linesStart = np.array([Xs[8], Xs[9]])
-        linesEnd = np.array([Ys[8], Ys[9]])
-        plt.plot(linesStart, linesEnd, 'm')
-
-        linesStart = np.array([Xs[9], Xs[18]])
-        linesEnd = np.array([Ys[9], Ys[18]])
-        plt.plot(linesStart, linesEnd, 'm')
-
-        linesStart = np.array([Xs[0], Xs[10]])
-        linesEnd = np.array([Ys[0], Ys[10]])
-        plt.plot(linesStart, linesEnd, 'y')
-
-        linesStart = np.array([Xs[10], Xs[11]])
-        linesEnd = np.array([Ys[10], Ys[11]])
-        plt.plot(linesStart, linesEnd, 'y')
-
-        linesStart = np.array([Xs[11], Xs[12]])
-        linesEnd = np.array([Ys[11], Ys[12]])
-        plt.plot(linesStart, linesEnd, 'y')
-
-        linesStart = np.array([Xs[12], Xs[19]])
-        linesEnd = np.array([Ys[12], Ys[19]])
-        plt.plot(linesStart, linesEnd, 'y')
-
-        linesStart = np.array([Xs[0], Xs[13]])
-        linesEnd = np.array([Ys[0], Ys[13]])
-        plt.plot(linesStart, linesEnd, 'b')
-
-        linesStart = np.array([Xs[13], Xs[14]])
-        linesEnd = np.array([Ys[13], Ys[14]])
-        plt.plot(linesStart, linesEnd, 'b')
-
-        linesStart = np.array([Xs[14], Xs[15]])
-        linesEnd = np.array([Ys[14], Ys[15]])
-        plt.plot(linesStart, linesEnd, 'b')
-
-        linesStart = np.array([Xs[15], Xs[20]])
-        linesEnd = np.array([Ys[15], Ys[20]])
-        plt.plot(linesStart, linesEnd, 'b')
+        for idx_tuple in idxs:
+            i, j, c = idx_tuple
+            linesStart = np.array([Xs[i], Xs[j]])
+            linesEnd = np.array([Ys[i], Ys[j]])
+            plt.plot(linesStart, linesEnd, c)
 
     def visualize(self, randIndexes, rightDomain, right_decoded_imgs,
                   rightToLeftCycle,

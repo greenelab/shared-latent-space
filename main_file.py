@@ -3,7 +3,7 @@ shared-latent-space/main_file.py
 
 This file is the main file which should be run from command line
 
-Usage: Run ij comand line with no arguments:
+Usage: Run in comand line with no arguments:
 
         python main_file.py
 
@@ -15,8 +15,6 @@ Output:
         /Output/<dataset> foled depending on the implementation.
 
 Currently, <dataset> can be ICVL or MNIST as included with this repo.
-
-TO DO: Make parameters into command line parameters.
 
 Author: Chris Williams
 Date: 5/22/18
