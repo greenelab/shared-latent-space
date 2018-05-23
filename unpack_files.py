@@ -1,4 +1,14 @@
+"""
+shared-latent-space/unpacked_files.py
 
+This function will unpack the data from their compressed form
+
+
+Author: Chris Williams
+Date: 5/23/18
+"""
+
+import os
 import cPickle
 import gzip
 
@@ -8,15 +18,30 @@ import shutil
 
 
 def unpackFiles(name):
-    with gzip.open('Data/' + name + '_Data/Training/' + name + '_Training.pkl.gz', 'rb') as f:
+    with gzip.open(os.path.join('Data',
+                                '{}_Data'.format(name),
+                                'Training',
+                                '{}_Training.pkl.gz'.format(name),
+                                'rb')) as f:
         file_content = f.read()
 
-    with open('Data/' + name + '_Data/Training/' + name + '_Training.pkl', 'wb') as f_in:
+    with open(os.path.join('Data',
+                           '{}_Data'.format(name),
+                           'Training',
+                           '{}_Training.pkl'.format(name),
+                           'wb')) as f:
         f_in.write(file_content)
 
-    with gzip.open('Data/' + name + '_Data/Testing/' + name + '_Testing.pkl.gz', 'rb') as f:
+    with gzip.open(os.path.join('Data',
+                                '{}_Data'.format(name),
+                                'Testing',
+                                '{}_Testing.pkl.gz'.format(name),
+                                'rb')) as f:
         file_content = f.read()
 
-    with open('Data/' + name + '_Data/Testing/' + name + '_Testing.pkl', 'wb') as f_in:
+    with open(os.path.join('Data',
+                           '{}_Data'.format(name),
+                           'Testing',
+                           '{}_Testing.pkl'.format(name),
+                           'wb')) as f:
         f_in.write(file_content)
-

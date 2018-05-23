@@ -1,32 +1,64 @@
-import numpy as np
-from numpy import linalg as LA
+"""
+shared-latent-space/shared_vae_class.py
 
-import keras
-from keras.datasets import mnist
-from keras.models import Sequential, Model
-from keras.layers import Dense, Dropout, Activation, Lambda, Input
-from keras.optimizers import SGD, Adam, RMSprop
-from keras.utils import np_utils
-from keras import backend as K
-from keras import objectives
-from keras.callbacks import EarlyStopping, Callback
-from keras.layers import LeakyReLU
-from keras.utils import plot_model
-import matplotlib.pyplot as plt
+This class contains the model and the associated functions.
+it is called by main_file.py. It uses many models to represent
+the various parts of the shared latent space VAE and allow for
+the training of certain parts in isolation. To train, it trains
+the model as a whole for n epochs, then switches between training
+only the shared part of the model, the left part, and the right
+parts individually for n epochs. This is achieved by freezing the
+weights. In the generate() function, the class calls upon the
+specific implementation of DataSetInfoAbstractClass for the
+given dataset.
+
+
+Author: Chris Williams
+Date: 5/22/18
+"""
+
 
 import os
 
-from model_objects import model_parameters
+import numpy as np
+import matplotlib.pyplot as plt
+import keras
+
+from keras.models import Model
+from keras.layers import Dense, Activation, Lambda, Input
+from keras.optimizers import Adam
+from keras import backend as K
+from keras.callbacks import EarlyStopping
+from keras.utils import plot_model
+
+# Local files
 import ICVL
 import MNIST
+
+from model_objects import model_parameters
 
 
 class shared_vae_class(object):
 
     def __init__(self, model_parameters):
+        """
+        Takes in parameters of the model.
+
+        Args:
+            model_parameters (model_parameters): Parameters for the model.
+
+        Returns: None
+        """
         self.params = model_parameters
 
     def compile_model(self):
+        """
+        Compiles the Model.
+
+        Args: None
+
+        Returns: None
+        """
 
         # the Sampling function for the VAE
         def sampling(args):
@@ -37,7 +69,7 @@ class shared_vae_class(object):
 
         # Loss function for the VAE
         # Loss function comprised of two parts, Cross_entropy, and
-        # divergense
+        # divergence
         def vae_loss(inputs, finalLayer):
             reconstruction_loss = K.sum(K.square(finalLayer - inputs))
             kl_loss = - 0.5 * K.sum(1 + z_log_sigmaFull - K.square(
@@ -47,7 +79,7 @@ class shared_vae_class(object):
 
         # Loss function for the left VAE
         # Loss function comprised of two parts, Cross_entropy, and
-        # divergense
+        # divergence
         def left_vae_loss(inputs, finalLayer):
             reconstruction_loss = K.sum(K.square(finalLayer - inputs))
             kl_loss = - 0.5 * K.sum(1 + z_log_sigmaLeft - K.square(
@@ -57,7 +89,7 @@ class shared_vae_class(object):
 
         # Loss function for the right VAE
         # Loss function comprised of two parts, Cross_entropy, and
-        # divergense
+        # divergence
         def right_vae_loss(inputs, finalLayer):
             reconstruction_loss = K.sum(K.square(finalLayer - inputs))
             kl_loss = - 0.5 * K.sum(1 + z_log_sigmaRight - K.square(
@@ -68,15 +100,19 @@ class shared_vae_class(object):
         # Define the Encoder with the Left and Right branches
         leftEncoderInput = Input(shape=(self.params.inputSizeLeft,))
         leftEncoderFirstLayer = Dense(
-            self.params.firstLayerSizeLeft, activation='relu')(leftEncoderInput)
+            self.params.firstLayerSizeLeft,
+            activation='relu')(leftEncoderInput)
         leftEncoderSecondLayer = Dense(
-            self.params.secondLayerSize, activation='relu')(leftEncoderFirstLayer)
+            self.params.secondLayerSize,
+            activation='relu')(leftEncoderFirstLayer)
 
         rightEncoderInput = Input(shape=(self.params.inputSizeRight,))
         rightEncoderFirstLayer = Dense(
-            self.params.firstLayerSizeRight, activation='relu')(rightEncoderInput)
+            self.params.firstLayerSizeRight,
+            activation='relu')(rightEncoderInput)
         rightEncoderSecondLayer = Dense(
-            self.params.secondLayerSize, activation='relu')(rightEncoderFirstLayer)
+            self.params.secondLayerSize,
+            activation='relu')(rightEncoderFirstLayer)
 
         encoderMergeLayer = Dense(
             self.params.thirdLayerSize, activation='relu')
@@ -115,21 +151,28 @@ class shared_vae_class(object):
         # Defining the Decoder with Left and Right Outputs
         decoderInputs = Input(shape=(self.params.encodedSize,))
         decoderFirstLayer = Dense(
-            self.params.thirdLayerSize, activation='relu')(decoderInputs)
+            self.params.thirdLayerSize,
+            activation='relu')(decoderInputs)
 
         leftDecoderSecondLayer = Dense(
-            self.params.secondLayerSize, activation='relu')(decoderFirstLayer)
+            self.params.secondLayerSize,
+            activation='relu')(decoderFirstLayer)
         leftDecoderThirdLayer = Dense(
-            self.params.firstLayerSizeLeft, activation='relu')(leftDecoderSecondLayer)
+            self.params.firstLayerSizeLeft,
+            activation='relu')(leftDecoderSecondLayer)
         leftDecoderOutput = Dense(
-            self.params.inputSizeLeft, activation='sigmoid')(leftDecoderThirdLayer)
+            self.params.inputSizeLeft,
+            activation='sigmoid')(leftDecoderThirdLayer)
 
         rightDecoderSecondLayer = Dense(
-            self.params.secondLayerSize, activation='relu')(decoderFirstLayer)
+            self.params.secondLayerSize,
+            activation='relu')(decoderFirstLayer)
         rightDecoderThirdLayer = Dense(
-            self.params.firstLayerSizeRight, activation='relu')(rightDecoderSecondLayer)
+            self.params.firstLayerSizeRight,
+            activation='relu')(rightDecoderSecondLayer)
         rightDecoderOutput = Dense(
-            self.params.inputSizeRight, activation='sigmoid')(rightDecoderThirdLayer)
+            self.params.inputSizeRight,
+            activation='sigmoid')(rightDecoderThirdLayer)
 
         # Three different Decoders
         self.fullDecoder = Model(
@@ -155,7 +198,8 @@ class shared_vae_class(object):
         self.vae_model = Model(
             [leftEncoderInput, rightEncoderInput], outputs)
         lowLearnAdam = keras.optimizers.Adam(
-            lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
+            lr=0.001, beta_1=0.9, beta_2=0.999,
+            epsilon=None, decay=0.0, amsgrad=False)
         self.vae_model.compile(optimizer=lowLearnAdam,
                                loss=vae_loss)  # Compile
         # vae_model.summary()
@@ -242,28 +286,48 @@ class shared_vae_class(object):
         self.centerModel.compile(
             optimizer=lowLearnAdam, loss=vae_loss)  # Compile
 
-        plot_model(self.fullEncoder, to_file="Output/" + str(self.params.dataSetInfo.name) + "/sharedVaeFullEncoder" +
-                   str(self.params.numEpochs) + '_' +
-                   str(self.params.firstLayerSizeLeft) + '_' +
-                   str(self.params.inputSizeLeft) + '_'
-                   + str(self.params.secondLayerSize) + '_' + str(self.params.thirdLayerSize) + '_' +
-                   str(self.params.encodedSize) + '_' + str(self.params.firstLayerSizeRight) +
-                   '_' + str(self.params.inputSizeRight)
-                   + '.png', show_shapes=True)
+        plot_model(self.fullEncoder,
+                   to_file=os.path.join('Output',
+                                        str(self.params.dataSetInfo.name),
+                                        'sharedVaeFullEncoder{}_{}_{}_\
+                                        {}_{}_{}_{}.png'
+                                        .format(str(self.params.numEpochs),
+                                                str(self.params.
+                                                    firstLayerSizeLeft),
+                                                str(self.params.inputSizeLeft),
+                                                str(self.params.
+                                                    secondLayerSize),
+                                                str(self.params.encodedSize),
+                                                str(self.params.
+                                                    firstLayerSizeRight),
+                                                str(self.params.
+                                                    inputSizeRight))),
+                   show_shapes=True)
 
     def train_model(self, leftDomain, rightDomain, denoising):
-        # Train the Model
+        """
+        Trains the model
+
+        Args:
+            leftDomain (array of floats): Left input.
+            rightDomain (array of floats): Right input.
+            denoising (float): Amount of noise to add before trainning.
+
+        Returns: None
+        """
 
         # If needs noise
         if (denoising > 0):
             noise_factor = denoising
-            # leftDomain_noisy = leftDomain + (noise_factor * \
-            #    np.random.normal(loc=0.0, scale=1.0, size=leftDomain.shape))
-            #leftDomain_noisy = np.clip(leftDomain_noisy, 0., 1.)
+            noise = (noise_factor * np.random.normal(loc=0.0, scale=1.0,
+                                                     size=leftDomain.shape))
+            leftDomain_noisy = leftDomain + noise
+            leftDomain_noisy = np.clip(leftDomain_noisy, 0., 1.)
             leftDomain_noisy = leftDomain
 
-            rightDomain_noisy = rightDomain + (noise_factor *
-                                               np.random.normal(loc=0.0, scale=1.0, size=rightDomain.shape))
+            noise = (noise_factor * np.random.normal(loc=0.0, scale=1.0,
+                                                     size=rightDomain.shape))
+            rightDomain_noisy = rightDomain + noise
             rightDomain_noisy = np.clip(rightDomain_noisy, 0., 1.)
         else:
             leftDomain_noisy = leftDomain
@@ -273,7 +337,8 @@ class shared_vae_class(object):
                                  patience=3, verbose=0, mode='auto')
 
         # Train the combined model
-        self.vae_model.fit([leftDomain_noisy, rightDomain_noisy], [leftDomain, rightDomain],
+        self.vae_model.fit([leftDomain_noisy, rightDomain_noisy],
+                           [leftDomain, rightDomain],
                            epochs=self.params.numEpochs,
                            batch_size=self.params.batchSize,
                            shuffle=True,
@@ -283,7 +348,8 @@ class shared_vae_class(object):
         # Take turns training each part of the model separately
         for i in range(self.params.numEpochs):
             print("On EPOCH: " + repr(i + 1))
-            self.centerModel.fit([leftDomain_noisy, rightDomain_noisy], [leftDomain, rightDomain],
+            self.centerModel.fit([leftDomain_noisy, rightDomain_noisy],
+                                 [leftDomain, rightDomain],
                                  epochs=1,
                                  batch_size=self.params.batchSize,
                                  shuffle=True,
@@ -296,16 +362,29 @@ class shared_vae_class(object):
                                 batch_size=self.params.batchSize)
 
     def generate(self, leftDomain, rightDomain):
+        """
+        Generates from the model. Calls the visualize of the
+        data specific implementation of DataSetInfoAbstractClass.
+
+        Args:
+            leftDomain (array of floats): Left input.
+            rightDomain (array of floats): Right input.
+
+        Returns: None
+        """
+
         # Create generated data
         predicted = self.fullEncoder.predict([leftDomain, rightDomain],
-                                             batch_size=self.params.batchSize)  # Predict the outputs
+                                             batch_size=self.params.batchSize)
         max_coords = np.amax(predicted, axis=0)
         min_coords = np.amin(predicted, axis=0)
 
         rng = np.random.uniform(
-            max_coords, min_coords, (rightDomain.shape[0], self.params.encodedSize))
+            max_coords, min_coords, (rightDomain.shape[0],
+                                     self.params.encodedSize))
 
-        (left_generatedImgs, right_generatedImgs) = self.fullDecoder.predict(rng)
+        (left_generatedImgs, right_generatedImgs) = (self.fullDecoder.
+                                                     predict(rng))
 
         # Create Left to Right Transformation
         (left_decoded_imgs, leftToRightImgs) = self.leftToRightModel.predict(
@@ -322,8 +401,12 @@ class shared_vae_class(object):
         randIndexes = np.random.randint(0, rightDomain.shape[0], (10,))
 
         # Visualize the Data if Applicable
-        self.params.dataSetInfo.visualize(randIndexes, rightDomain, right_decoded_imgs, rightToLeftCycle, right_generatedImgs, leftToRightImgs,
-                                          leftDomain, left_decoded_imgs, leftToRightCycle, left_generatedImgs, rightToLeftImgs, self.params)
+        self.params.dataSetInfo.visualize(randIndexes, rightDomain,
+                                          right_decoded_imgs, rightToLeftCycle,
+                                          right_generatedImgs, leftToRightImgs,
+                                          leftDomain, left_decoded_imgs,
+                                          leftToRightCycle, left_generatedImgs,
+                                          rightToLeftImgs, self.params)
 
         # Find the Difference in the cycles
         leftCycleDifference = (np.absolute(left_decoded_imgs)
@@ -350,7 +433,8 @@ class shared_vae_class(object):
 
         # Create Right to Left Transformation Noise
         (rightToLeftImgsNoise,
-         right_decoded_imgs_noise) = self.rightToLeftModel.predict(rightRandomNoise)
+         right_decoded_imgs_noise) = (self.rightToLeftModel.
+                                      predict(rightRandomNoise))
 
         # Create the Noise cycle images
         (leftToRightCycleNoise, _) = self.rightToLeftModel.predict(
