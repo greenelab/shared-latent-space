@@ -3,6 +3,10 @@
 Shared Latent Space VAE's find relationships between two different domains and allow for transformations between the two. This has especially useful implications in biology, where you may be able to have predictions of how certain tests will look based on ones you already possess. 
 
 
+# Diagram of Model
+![Alt text](Shared_Latent_Space_VAE.png)
+
+
 # Files
 
 ### main_file.py
