@@ -29,13 +29,17 @@ class dataInfo(dataSetInfoAbstract):
 
     def __init__(self):
         """
-        Defines the object's name and image size
+        Defines the object's name, file locations and image size
 
         Args: None
 
         Returns: None
         """
         self.name = "ICVL"
+        self.training_file = os.path.join('Data', 'ICVL_Data', 'Training',
+                                          'ICVL_Training.pkl')
+        self.testing_file = os.path.join('Data', 'ICVL_Data', 'Testing',
+                                         'ICVL_Testing.pkl')
         self.Xdim = 60
         self.Ydim = 80
 
@@ -50,10 +54,10 @@ class dataInfo(dataSetInfoAbstract):
                     right training data, right testing data
         """
 
-        with open("Data/ICVL_Data/Training/ICVL_Training.pkl", "rb") as fp:
+        with open(self.training_file, "rb") as fp:
             (x_train, a_train) = cPickle.load(fp)
 
-        with open("Data/ICVL_Data/Testing/ICVL_Testing.pkl", "rb") as fp:
+        with open(self.testing_file, "rb") as fp:
             (x_test, a_test) = cPickle.load(fp)
         return (x_train, a_train, x_test, a_test)
 

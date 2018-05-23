@@ -39,6 +39,10 @@ class dataInfo(dataSetInfoAbstract):
         Returns: None
         """
         self.name = "MNIST"
+        self.training_file = os.path.join('Data', 'MNIST_Data', 'Testing',
+                                          'MNIST_Testing.pkl')
+        self.testing_file = os.path.join('Data', 'MNIST_Data', 'Testing',
+                                         'MNIST_Testing.pkl')
         self.Xdim = 28
         self.Ydim = 28
 
@@ -54,10 +58,10 @@ class dataInfo(dataSetInfoAbstract):
         """
 
         # Loading the MNIST Data
-        with open("Data/MNIST_Data/Training/MNIST_Training.pkl", "rb") as fp:
+        with open(self.training_file, "rb") as fp:
             (x_train, a_train) = cPickle.load(fp)
 
-            with open("Data/MNIST_Data/Testing/MNIST_Testing.pkl", "rb") as fp:
+            with open(self.testing_file, "rb") as fp:
                 (x_test, a_test) = cPickle.load(fp)
         return (x_train, a_train, x_test, a_test)
 
