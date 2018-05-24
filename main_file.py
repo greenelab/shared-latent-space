@@ -1,30 +1,57 @@
-from shared_vae_class import shared_vae_class
-from model_objects import model_parameters
+"""
+shared-latent-space/main_file.py
 
+This file is the main file which should be run from command line
+
+Usage: Run in comand line with no arguments:
+
+        python main_file.py
+
+Output:
+    Represenation of the model's encoder saved to /Output/<dataset>
+        with the parameters of the model in the file name.
+    Visualiazations as defined in <dataset>'s corresponding implementation
+        of DataSetInfoAbstractClass. These may also be saved to the
+        /Output/<dataset> foled depending on the implementation.
+
+Currently, <dataset> can be ICVL or MNIST as included with this repo.
+
+Author: Chris Williams
+Date: 5/22/18
+"""
+
+
+import os
 
 import keras
-from keras.datasets import mnist
-
 import numpy as np
 
-# Loading the MNIST Data
-(x_train, _), (_, _) = mnist.load_data()
+# Local files
+import ICVL
+import MNIST
 
-# Formating the MNIST Data
-x_train = x_train.astype('float32') / 255.
-x_train = x_train.reshape((len(x_train), np.prod(x_train.shape[1:])))
+from shared_vae_class import shared_vae_class
+from model_objects import model_parameters
+# MNIST 28x28
+# ICVL 60x80
 
-# Making Copies of the Data to creat Inverses
-import copy
+dataSetInfo = ICVL.dataInfo()
 
-a_train = copy.copy(x_train)
-for i in range(len(a_train)):
-    a_train[i] = 1 - a_train[i]
+(x_train, a_train, x_test, a_test) = dataSetInfo.load()
 
-
-# Define the model parameters: Batch size, Epochs, First layer size,
+if not os.path.exists(os.path.join('Output', dataSetInfo.name)):
+    os.mkdir(os.path.join('Output', dataSetInfo.name))
 # second layer size, third layer size, encoded size, input size
-model_parameters = model_parameters(128, 15, 512, 256, 128, 64, 784)
+model_parameters = model_parameters(
+    batchSize=256, numEpochs=1,
+    inputSizeLeft=x_train.shape[1],
+    firstLayerSizeLeft=96,
+    secondLayerSize=64,
+    thirdLayerSize=32,
+    encodedSize=16,
+    inputSizeRight=a_train.shape[1],
+    firstLayerSizeRight=1024,
+    dataSetInfo=dataSetInfo)
 
 # Create the model with the parameters
 shared_vae = shared_vae_class(model_parameters)
