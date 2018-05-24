@@ -23,7 +23,6 @@ import seaborn as sns
 # Local files
 from model_objects import model_parameters
 from DataSetInfoAbstractClass import dataSetInfoAbstract
-import cPickle
 
 
 class dataInfo(dataSetInfoAbstract):

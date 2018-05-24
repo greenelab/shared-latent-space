@@ -90,6 +90,7 @@ dependencies:
   - qt=5.9.5=h7e424d6_0
   - readline=7.0=ha6073c6_4
   - scikit-image=0.13.1=py27h14c3975_1
+  - scikit-learn=0.19.1
   - scipy=1.0.0=py27hf5f0f52_0
   - seaborn=0.8.1=py27h633ea1e_0
   - setuptools=39.1.0=py27_0

@@ -26,7 +26,6 @@ from keras.datasets import mnist
 # Local Files
 from model_objects import model_parameters
 from DataSetInfoAbstractClass import dataSetInfoAbstract
-import cPickle
 
 
 class dataInfo(dataSetInfoAbstract):

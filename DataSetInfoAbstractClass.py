@@ -34,7 +34,7 @@ class dataSetInfoAbstract(object):
     def visualize(self, randIndexes, rightDomain, right_decoded_imgs,
                   rightToLeftCycle, right_generatedImgs, leftToRightImgs,
                   leftDomain, left_decoded_imgs, leftToRightCycle,
-                  left_generatedImgs, rightToLeftImgs, params, n=10):
+                  left_generatedImgs, rightToLeftImgs, params, n):
         """
         Visualizes all of the data passed to it. This does not need to return
         anything.
@@ -65,7 +65,8 @@ class dataSetInfoAbstract(object):
             rightToLeftImgs (array of floats): Right input encoded and decoded
                                                as left.
             params (model_parameters): Parameters of the model.
-            n (int): Defaults to 10, number of visualizations.
+            n (int): Number of visualizations, should be given a default
+                     in implementation.
 
         Returns: None
         """

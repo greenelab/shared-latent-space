@@ -29,6 +29,7 @@ import numpy as np
 # Local files
 import ICVL
 import MNIST
+import Cognoma
 
 from unpack_files import unpackFiles
 from shared_vae_class import shared_vae_class
@@ -36,27 +37,34 @@ from model_objects import model_parameters
 # MNIST 28x28
 # ICVL 60x80
 
-dataSetInfo = MNIST.dataInfo()
+dataSetInfo = Cognoma.dataInfo()
 
-if not os.path.exists(os.path.join('Data', 'Training',
+if not os.path.exists(os.path.join('Data',
+                                   '{}_Data'.format(dataSetInfo.name),
+                                   'Training',
                                    '{}_Training.pkl'.format(dataSetInfo.
                                                             name))):
     unpackFiles(dataSetInfo.name)
 
 (x_train, a_train, x_test, a_test) = dataSetInfo.load()
 
+print("Finished Loading")
+print x_train.shape
+print a_train.shape
+
+
 if not os.path.exists(os.path.join('Output', dataSetInfo.name)):
     os.mkdir(os.path.join('Output', dataSetInfo.name))
-# second layer size, third layer size, encoded size, input size
+
 model_parameters = model_parameters(
-    batchSize=256, numEpochs=1,
+    batchSize=128, numEpochs=20,
     inputSizeLeft=x_train.shape[1],
-    firstLayerSizeLeft=96,
-    secondLayerSize=64,
-    thirdLayerSize=32,
-    encodedSize=16,
+    firstLayerSizeLeft=640,
+    secondLayerSize=80,
+    thirdLayerSize=48,
+    encodedSize=32,
     inputSizeRight=a_train.shape[1],
-    firstLayerSizeRight=1024,
+    firstLayerSizeRight=512,
     dataSetInfo=dataSetInfo)
 
 
@@ -66,5 +74,5 @@ shared_vae = shared_vae_class(model_parameters)
 shared_vae.compile_model()
 
 # Train the model with: left domain, right domain, and noise
-shared_vae.train_model(x_train, a_train, .5)
+shared_vae.train_model(x_train, a_train, 0)
 shared_vae.generate(x_train, a_train)

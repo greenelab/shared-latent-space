@@ -21,27 +21,27 @@ def unpackFiles(name):
     with gzip.open(os.path.join('Data',
                                 '{}_Data'.format(name),
                                 'Training',
-                                '{}_Training.pkl.gz'.format(name),
-                                'rb')) as f:
+                                '{}_Training.pkl.gz'.format(name)),
+                   'rb') as f:
         file_content = f.read()
 
     with open(os.path.join('Data',
                            '{}_Data'.format(name),
                            'Training',
-                           '{}_Training.pkl'.format(name),
-                           'wb')) as f:
+                           '{}_Training.pkl'.format(name)),
+              'wb') as f:
         f_in.write(file_content)
 
     with gzip.open(os.path.join('Data',
                                 '{}_Data'.format(name),
                                 'Testing',
-                                '{}_Testing.pkl.gz'.format(name),
-                                'rb')) as f:
+                                '{}_Testing.pkl.gz'.format(name)),
+                   'rb') as f:
         file_content = f.read()
 
     with open(os.path.join('Data',
                            '{}_Data'.format(name),
                            'Testing',
-                           '{}_Testing.pkl'.format(name),
-                           'wb')) as f:
+                           '{}_Testing.pkl'.format(name)),
+              'wb') as f:
         f_in.write(file_content)

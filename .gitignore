@@ -4,3 +4,5 @@ temp.py
 vae.py
 *.pyc
 __pycache__/
+*.tsv
+*.bz2
