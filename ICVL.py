@@ -92,7 +92,7 @@ class dataInfo(dataSetInfoAbstract):
             linesEnd = np.array([Ys[i], Ys[j]])
             plt.plot(linesStart, linesEnd, c)
 
-    def visualize(self, randIndexes, rightDomain, right_decoded_imgs,
+    def visualize(self, rightDomain, right_decoded_imgs,
                   rightToLeftCycle,
                   right_generatedImgs, leftToRightImgs,
                   leftDomain, left_decoded_imgs, leftToRightCycle,
@@ -101,8 +101,6 @@ class dataInfo(dataSetInfoAbstract):
         Visualizes all of the data passed to it.
 
         Args:
-            randIndexes (array of ints): Random points to portray,
-                                         but same for each set of data
             rightDomain (array of floats): Right input.
             right_decoded_imgs (array of floats): Right input
                                                   encoded and decoded.
@@ -130,6 +128,7 @@ class dataInfo(dataSetInfoAbstract):
 
         Returns: None
         """
+        randIndexes = np.random.randint(0, rightDomain.shape[0], (n,))
 
         plt.figure(figsize=(120, 40))
         for i in range(n):

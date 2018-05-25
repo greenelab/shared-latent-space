@@ -289,8 +289,8 @@ class shared_vae_class(object):
         plot_model(self.fullEncoder,
                    to_file=os.path.join('Output',
                                         str(self.params.dataSetInfo.name),
-                                        'sharedVaeFullEncoder{}_{}_{}_\
-                                        {}_{}_{}_{}.png'
+                                        ('sharedVaeFullEncoder'
+                                         '{}_{}_{}_{}_{}_{}_{}.png')
                                         .format(str(self.params.numEpochs),
                                                 str(self.params.
                                                     firstLayerSizeLeft),
@@ -398,10 +398,8 @@ class shared_vae_class(object):
         (leftToRightCycle, _) = self.rightToLeftModel.predict(leftToRightImgs)
         (_, rightToLeftCycle) = self.leftToRightModel.predict(rightToLeftImgs)
 
-        randIndexes = np.random.randint(0, rightDomain.shape[0], (10,))
-
         # Visualize the Data if Applicable
-        self.params.dataSetInfo.visualize(randIndexes, rightDomain,
+        self.params.dataSetInfo.visualize(rightDomain,
                                           right_decoded_imgs, rightToLeftCycle,
                                           right_generatedImgs, leftToRightImgs,
                                           leftDomain, left_decoded_imgs,

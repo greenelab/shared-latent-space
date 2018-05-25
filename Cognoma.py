@@ -41,6 +41,10 @@ class dataInfo(dataSetInfoAbstract):
                                           'Cognoma_Training.pkl')
         self.testing_file = os.path.join('Data', 'Cognoma_Data', 'Testing',
                                          'Cognoma_Testing.pkl')
+        self.rightXDim = 40
+        self.rightYDim = 36
+        self.leftXDim = 100
+        self.leftYDim = 80
 
     def load(self):
         """
@@ -59,7 +63,7 @@ class dataInfo(dataSetInfoAbstract):
         a_test = a_train
         return (x_train, a_train, x_test, a_test)
 
-    def visualize(self, randIndexes, rightDomain, right_decoded_imgs,
+    def visualize(self, rightDomain, right_decoded_imgs,
                   rightToLeftCycle,
                   right_generatedImgs, leftToRightImgs,
                   leftDomain, left_decoded_imgs, leftToRightCycle,
@@ -68,8 +72,6 @@ class dataInfo(dataSetInfoAbstract):
         Visualizes all of the data passed to it.
 
         Args:
-            randIndexes (array of ints): Random points to portray,
-                                         but same for each set of data
             rightDomain (array of floats): Right input.
             right_decoded_imgs (array of floats): Right input
                                                   encoded and decoded.
@@ -97,6 +99,63 @@ class dataInfo(dataSetInfoAbstract):
 
         Returns: None
         """
+        rightDomainFloat = rightDomain.astype('float64')
+
+        randIndexes = np.random.randint(0, rightDomain.shape[0], (10,))
+
+        plt.figure(figsize=(120, 40))
+        for i in range(10):
+
+            # display original Depth Map
+            ax = plt.subplot(4, 10, i + 1)
+            plt.imshow(rightDomainFloat[randIndexes[i]].
+                       reshape(self.rightXDim,
+                               self.rightYDim))
+            ax.get_xaxis().set_visible(False)
+            ax.get_yaxis().set_visible(False)
+            if (i == 0):
+                ax.set_title("Right Domain (Mutated) Truth")
+
+            # display depth map reconstruction
+            ax = plt.subplot(4, 10, i + 1 + 10)
+            plt.imshow(right_decoded_imgs[randIndexes[i]]
+                       .reshape(self.rightXDim,
+                                self.rightYDim))
+            ax.get_xaxis().set_visible(False)
+            ax.get_yaxis().set_visible(False)
+            if (i == 0):
+                ax.set_title("Right Domain (Mutated) Reconstructed")
+
+            # display right to left transformed cycled through
+            ax = plt.subplot(4, 10, i + 1 + 2 * 10)
+            plt.imshow(leftDomain[randIndexes[i]].reshape(self.leftXDim,
+                                                          self.leftYDim))
+            ax.get_xaxis().set_visible(False)
+            ax.get_yaxis().set_visible(False)
+            if (i == 0):
+                ax.set_title("Left Domain (Expression) Truth")
+
+            # display depth generated
+            ax = plt.subplot(4, 10, i + 1 + 3 * 10)
+            plt.imshow(left_decoded_imgs[randIndexes[i]]
+                       .reshape(self.leftXDim,
+                                self.leftYDim))
+            ax.get_xaxis().set_visible(False)
+            ax.get_yaxis().set_visible(False)
+            if (i == 0):
+                ax.set_title("Left Domain (Expression) Reconstructed")
+
+        plt.savefig(os.path.join('Output', 'Cognoma',
+                                 'Visualized_{}_{}_{}_{}_{}_{}_{}_{}.png'.
+                                 format(str(params.numEpochs),
+                                        str(params.firstLayerSizeLeft),
+                                        str(params.inputSizeLeft),
+                                        str(params.secondLayerSize),
+                                        str(params.thirdLayerSize),
+                                        str(params.encodedSize),
+                                        str(params.firstLayerSizeRight),
+                                        str(params.inputSizeRight))))
+
         # Make matrix of data for cluster map for the Right Domain
         num_examples = n
         random = np.random.randint(0, num_examples,
@@ -128,8 +187,20 @@ class dataInfo(dataSetInfoAbstract):
                            col_colors=label_colors,
                            xticklabels=False, yticklabels=False)
         # To re-enable colorbar, comment-out the following line
-        g.fig.suptitle('Right Domain (Mutation), Original and Reconstructed Clustermap')
+        g.fig.suptitle('Right Domain (Mutated), Original and Reconstructed'
+                       ' Clustermap')
         g.cax.set_visible(False)
+
+        plt.savefig(os.path.join('Output', 'Cognoma',
+                                 'RightHeatmap_{}_{}_{}_{}_{}_{}_{}_{}.png'.
+                                 format(str(params.numEpochs),
+                                        str(params.firstLayerSizeLeft),
+                                        str(params.inputSizeLeft),
+                                        str(params.secondLayerSize),
+                                        str(params.thirdLayerSize),
+                                        str(params.encodedSize),
+                                        str(params.firstLayerSizeRight),
+                                        str(params.inputSizeRight))))
 
         # For the Left Domain
         random = np.random.randint(0, num_examples,
@@ -162,6 +233,17 @@ class dataInfo(dataSetInfoAbstract):
                            xticklabels=False, yticklabels=False)
         # To re-enable colorbar, comment-out the following line
         g.cax.set_visible(False)
-        g.fig.suptitle('Left Domain (Expression), Original and Reconstructed Clustermap')
+        g.fig.suptitle('Left Domain (Expression), Original and Reconstructed'
+                       ' Clustermap')
         plt.show()
+        plt.savefig(os.path.join('Output', 'Cognoma',
+                                 'LeftHeatmap_{}_{}_{}_{}_{}_{}_{}_{}.png'.
+                                 format(str(params.numEpochs),
+                                        str(params.firstLayerSizeLeft),
+                                        str(params.inputSizeLeft),
+                                        str(params.secondLayerSize),
+                                        str(params.thirdLayerSize),
+                                        str(params.encodedSize),
+                                        str(params.firstLayerSizeRight),
+                                        str(params.inputSizeRight))))
         return

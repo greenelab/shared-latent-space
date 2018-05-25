@@ -57,7 +57,7 @@ if not os.path.exists(os.path.join('Output', dataSetInfo.name)):
     os.mkdir(os.path.join('Output', dataSetInfo.name))
 
 model_parameters = model_parameters(
-    batchSize=128, numEpochs=20,
+    batchSize=128, numEpochs=1,
     inputSizeLeft=x_train.shape[1],
     firstLayerSizeLeft=640,
     secondLayerSize=80,
@@ -74,5 +74,5 @@ shared_vae = shared_vae_class(model_parameters)
 shared_vae.compile_model()
 
 # Train the model with: left domain, right domain, and noise
-shared_vae.train_model(x_train, a_train, 0)
+shared_vae.train_model(x_train, a_train, .2)
 shared_vae.generate(x_train, a_train)

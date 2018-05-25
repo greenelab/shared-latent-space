@@ -31,7 +31,7 @@ class dataSetInfoAbstract(object):
         return
 
     @abstractmethod
-    def visualize(self, randIndexes, rightDomain, right_decoded_imgs,
+    def visualize(self, rightDomain, right_decoded_imgs,
                   rightToLeftCycle, right_generatedImgs, leftToRightImgs,
                   leftDomain, left_decoded_imgs, leftToRightCycle,
                   left_generatedImgs, rightToLeftImgs, params, n):
@@ -40,8 +40,6 @@ class dataSetInfoAbstract(object):
         anything.
 
         Args:
-            randIndexes (array of ints): Random points to portray,
-                                         but same for each set of data
             rightDomain (array of floats): Right input.
             right_decoded_imgs (array of floats): Right input
                                                   encoded and decoded.

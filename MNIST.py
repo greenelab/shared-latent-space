@@ -64,7 +64,7 @@ class dataInfo(dataSetInfoAbstract):
             (x_test, a_test) = cPickle.load(fp)
         return (x_train, a_train, x_test, a_test)
 
-    def visualize(self, randIndexes, rightDomain, right_decoded_imgs,
+    def visualize(self, rightDomain, right_decoded_imgs,
                   rightToLeftCycle, right_generatedImgs, leftToRightImgs,
                   leftDomain, left_decoded_imgs, leftToRightCycle,
                   left_generatedImgs, rightToLeftImgs, params, n=10):
@@ -72,8 +72,6 @@ class dataInfo(dataSetInfoAbstract):
         Visualizes all of the data passed to it.
 
         Args:
-            randIndexes (array of ints): Random points to portray,
-                                         but same for each set of data
             rightDomain (array of floats): Right input.
             right_decoded_imgs (array of floats): Right input
                                                   encoded and decoded.
@@ -101,6 +99,7 @@ class dataInfo(dataSetInfoAbstract):
 
         Returns: None
         """
+        randIndexes = np.random.randint(0, rightDomain.shape[0], (n,))
 
         # Display the Original, Reconstructed, Transformed, Cycle, and
         # Generated data for both the regular and invserve MNIST data
