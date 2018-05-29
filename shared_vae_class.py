@@ -177,7 +177,7 @@ class shared_vae_class(object):
         # Three different Decoders
         self.fullDecoder = Model(
             decoderInputs, [leftDecoderOutput, rightDecoderOutput])
-        leftDeocder = Model(decoderInputs, leftDecoderOutput)
+        leftDecoder = Model(decoderInputs, leftDecoderOutput)
         rightDecoder = Model(decoderInputs, rightDecoderOutput)
         # decoder.summary()
 
@@ -189,7 +189,21 @@ class shared_vae_class(object):
         # Right to Left transition
         outputs = self.fullDecoder(rightEncoder(rightEncoderInput))
         self.rightToLeftModel = Model(rightEncoderInput, outputs)
+        self.rightToLeftModel.compile(optimizer='Adam',
+                                      loss=vae_loss)
         # rightToLeftModel.summary()
+
+        # TESTINGINGINGINGINGING
+        outputs = rightDecoder(leftEncoder(leftEncoderInput))
+        self.leftToRightTransitionModel = Model(leftEncoderInput, outputs)
+        self.leftToRightTransitionModel.compile(optimizer='Adam',
+                                                loss=left_vae_loss)
+
+        # TESTINGINGINGINGINGING
+        outputs = leftDecoder(rightEncoder(rightEncoderInput))
+        self.rightToLeftTransitionModel = Model(rightEncoderInput, outputs)
+        self.rightToLeftTransitionModel.compile(optimizer='Adam',
+                                                loss=right_vae_loss)
 
         # Full Model
         outputs = self.fullDecoder(self.fullEncoder(
@@ -228,7 +242,7 @@ class shared_vae_class(object):
         decoderFirstLayer.trainable = False
 
         # Left VAE model which can't train middle
-        outputs = leftDeocder(leftEncoder(leftEncoderInput))
+        outputs = leftDecoder(leftEncoder(leftEncoderInput))
         self.leftModel = Model(leftEncoderInput, outputs)
         self.leftModel.compile(
             optimizer=lowLearnAdam, loss=left_vae_loss)
@@ -337,29 +351,51 @@ class shared_vae_class(object):
                                  patience=3, verbose=0, mode='auto')
 
         # Train the combined model
-        self.vae_model.fit([leftDomain_noisy, rightDomain_noisy],
+        '''self.vae_model.fit([leftDomain_noisy, rightDomain_noisy],
                            [leftDomain, rightDomain],
                            epochs=self.params.numEpochs,
                            batch_size=self.params.batchSize,
                            shuffle=True,
                            callbacks=[callback],
                            verbose=1)
-
+        '''
         # Take turns training each part of the model separately
         for i in range(self.params.numEpochs):
             print("On EPOCH: " + repr(i + 1))
-            self.centerModel.fit([leftDomain_noisy, rightDomain_noisy],
-                                 [leftDomain, rightDomain],
-                                 epochs=1,
-                                 batch_size=self.params.batchSize,
-                                 shuffle=True,
-                                 callbacks=[callback])
+            self.vae_model.fit([leftDomain_noisy, rightDomain_noisy],
+                               [leftDomain, rightDomain],
+                               epochs=1,
+                               batch_size=self.params.batchSize,
+                               shuffle=True,
+                               callbacks=[callback])
             self.leftModel.fit(leftDomain_noisy, leftDomain,
                                epochs=1,
                                batch_size=self.params.batchSize)
             self.rightModel.fit(rightDomain_noisy, rightDomain,
                                 epochs=1,
                                 batch_size=self.params.batchSize)
+
+            self.centerModel.fit([leftDomain_noisy, rightDomain_noisy],
+                                 [leftDomain, rightDomain],
+                                 epochs=1,
+                                 batch_size=self.params.batchSize,
+                                 shuffle=True,
+                                 callbacks=[callback])
+
+            self.leftToRightTransitionModel.fit(leftDomain_noisy,
+                                                rightDomain,
+                                                epochs=1,
+                                                batch_size=self.params.
+                                                batchSize,
+                                                shuffle=True,
+                                                callbacks=[callback])
+            self.rightToLeftTransitionModel.fit(rightDomain_noisy,
+                                                leftDomain,
+                                                epochs=1,
+                                                batch_size=self.params.
+                                                batchSize,
+                                                shuffle=True,
+                                                callbacks=[callback])
 
     def generate(self, leftDomain, rightDomain):
         """
