@@ -22,6 +22,7 @@ Date: 5/22/18
 
 
 import os
+import argparse
 
 import keras
 import numpy as np
@@ -34,10 +35,39 @@ import Cognoma
 from unpack_files import unpackFiles
 from shared_vae_class import shared_vae_class
 from model_objects import model_parameters
-# MNIST 28x28
-# ICVL 60x80
 
-dataSetInfo = Cognoma.dataInfo()
+
+def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data", help="The name of the data file", type=str)
+    parser.add_argument("--batchSize", help="Batch Size", type=int,
+                        default=128)
+    parser.add_argument("--numEpochs", help="Number of training Epochs",
+                        type=int, default=60)
+    parser.add_argument("--firstLayerSizeLeft", help="Left firstlayer size",
+                        type=int)
+    parser.add_argument("--secondLayerSize",
+                        help="Second layer", type=int)
+    parser.add_argument("--thirdLayerSize",
+                        help="Third layer", type=int)
+    parser.add_argument("--encodedSize",
+                        help="Encdoded size", type=int)
+    parser.add_argument("--firstLayerSizeRight",  help="Right firstlayer size",
+                        type=int)
+    args = parser.parse_args()
+    return args
+
+
+args = get_args()
+# Dictionary of generator types. The string is the command line argument     !!
+data_dict = {
+        'MNIST': MNIST.dataInfo(),
+        'ICVL': ICVL.dataInfo(),
+        'Cognoma': Cognoma.dataInfo()
+}
+
+
+dataSetInfo = data_dict[args.data]
 
 if not os.path.exists(os.path.join('Data',
                                    '{}_Data'.format(dataSetInfo.name),
@@ -57,16 +87,19 @@ if not os.path.exists(os.path.join('Output', dataSetInfo.name)):
     os.mkdir(os.path.join('Output', dataSetInfo.name))
 
 model_parameters = model_parameters(
+<<<<<<< HEAD
     batchSize=128, numEpochs=250y,
+=======
+    batchSize=args.batchSize, numEpochs=args.numEpochs,
+>>>>>>> Jupyter
     inputSizeLeft=x_train.shape[1],
-    firstLayerSizeLeft=640,
-    secondLayerSize=80,
-    thirdLayerSize=48,
-    encodedSize=32,
+    firstLayerSizeLeft=args.firstLayerSizeLeft,
+    secondLayerSize=args.secondLayerSize,
+    thirdLayerSize=args.thirdLayerSize,
+    encodedSize=args.encodedSize,
     inputSizeRight=a_train.shape[1],
-    firstLayerSizeRight=512,
+    firstLayerSizeRight=args.firstLayerSizeRight,
     dataSetInfo=dataSetInfo)
-
 
 # Create the model with the parameters
 shared_vae = shared_vae_class(model_parameters)
