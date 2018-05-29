@@ -87,11 +87,7 @@ if not os.path.exists(os.path.join('Output', dataSetInfo.name)):
     os.mkdir(os.path.join('Output', dataSetInfo.name))
 
 model_parameters = model_parameters(
-<<<<<<< HEAD
-    batchSize=128, numEpochs=250y,
-=======
     batchSize=args.batchSize, numEpochs=args.numEpochs,
->>>>>>> Jupyter
     inputSizeLeft=x_train.shape[1],
     firstLayerSizeLeft=args.firstLayerSizeLeft,
     secondLayerSize=args.secondLayerSize,

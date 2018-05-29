@@ -28,7 +28,7 @@ from keras.models import Model
 from keras.layers import Dense, Activation, Lambda, Input
 from keras.optimizers import Adam
 from keras import backend as K
-from keras.callbacks import EarlyStopping
+from keras.callbacks import EarlyStopping, Callback
 from keras.utils import plot_model
 
 # Local files
@@ -360,14 +360,23 @@ class shared_vae_class(object):
                            verbose=1)
         '''
         # Take turns training each part of the model separately
+        vae_loss_data = []
+        vae_loss_callback = custom_callback(vae_loss_data)
+
+        left_vae_loss_data = []
+        left_callback = custom_callback(left_vae_loss_data)
+
+        right_vae_loss_data = []
+        right_callback = custom_callback(right_vae_loss_data)
+
         for i in range(self.params.numEpochs):
-            print("On EPOCH: " + repr(i + 1))
+            print("On EPOCH: " + repr(i + 1)) 
             self.vae_model.fit([leftDomain_noisy, rightDomain_noisy],
                                [leftDomain, rightDomain],
                                epochs=1,
                                batch_size=self.params.batchSize,
                                shuffle=True,
-                               callbacks=[callback])
+                               callbacks=[callback, vae_loss_callback])
             self.leftModel.fit(leftDomain_noisy, leftDomain,
                                epochs=1,
                                batch_size=self.params.batchSize)
@@ -388,14 +397,40 @@ class shared_vae_class(object):
                                                 batch_size=self.params.
                                                 batchSize,
                                                 shuffle=True,
-                                                callbacks=[callback])
+                                                callbacks=[callback,
+                                                           left_callback])
             self.rightToLeftTransitionModel.fit(rightDomain_noisy,
                                                 leftDomain,
                                                 epochs=1,
                                                 batch_size=self.params.
                                                 batchSize,
                                                 shuffle=True,
-                                                callbacks=[callback])
+                                                callbacks=[callback,
+                                                           right_callback])
+
+        import seaborn as sns
+        import matplotlib.pyplot as plt
+        import pandas as pd
+
+        sns.set_style("darkgrid")
+        data = np.vstack((vae_loss_data, left_vae_loss_data, right_vae_loss_data))
+
+        output_df = pd.DataFrame(data, ["Whole VAE Loss", "Left to Right Loss", "Right to Left Loss"]).T
+        output_df.plot()
+
+        # save the output
+        plt.savefig(os.path.join('Output', str(self.params.dataSetInfo.name),
+                                 'Loss_{}_{}_{}_{}_{}_{}_{}_{}_{}.png'.
+                                 format(str(vae_loss_data[-1]),
+                                        str(self.params.numEpochs),
+                                        str(self.params.firstLayerSizeLeft),
+                                        str(self.params.inputSizeLeft),
+                                        str(self.params.secondLayerSize),
+                                        str(self.params.thirdLayerSize),
+                                        str(self.params.encodedSize),
+                                        str(self.params.firstLayerSizeRight),
+                                        str(self.params.inputSizeRight))))
+        plt.show()
 
     def generate(self, leftDomain, rightDomain):
         """
@@ -485,3 +520,12 @@ class shared_vae_class(object):
               repr(np.sum(leftCycleDifferenceNoise) / leftDomain.shape[0]))
         print("Right Cycle Noise Difference: " +
               repr(np.sum(rightCycleDifferenceNoise) / leftDomain.shape[0]))
+
+
+class custom_callback(Callback):
+
+    def __init__(self, loss_data):
+        self.loss_data = loss_data
+
+    def on_epoch_end(self, epoch, logs={}):
+        self.loss_data.append(logs.get('loss'))
