@@ -235,7 +235,7 @@ class dataInfo(dataSetInfoAbstract):
         g.cax.set_visible(False)
         g.fig.suptitle('Left Domain (Expression), Original and Reconstructed'
                        ' Clustermap')
-        
+
         plt.savefig(os.path.join('Output', 'Cognoma',
                                  'LeftHeatmap_{}_{}_{}_{}_{}_{}_{}_{}.png'.
                                  format(str(params.numEpochs),

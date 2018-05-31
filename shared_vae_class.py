@@ -430,7 +430,7 @@ class shared_vae_class(object):
                                         str(self.params.encodedSize),
                                         str(self.params.firstLayerSizeRight),
                                         str(self.params.inputSizeRight))))
-        plt.show()
+        # plt.show()
 
     def generate(self, leftDomain, rightDomain):
         """
