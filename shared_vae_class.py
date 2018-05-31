@@ -67,16 +67,6 @@ class shared_vae_class(object):
                 shape=(K.shape(z_mean)[0], self.params.encodedSize))
             return z_mean + K.exp(z_log_sigma) * epsilon
 
-        # Loss function for the VAE
-        # Loss function comprised of two parts, Cross_entropy, and
-        # divergence
-        def vae_loss(inputs, finalLayer):
-            reconstruction_loss = K.sum(K.square(finalLayer - inputs))
-            kl_loss = - 0.5 * K.sum(1 + z_log_sigmaFull - K.square(
-                z_meanFull) - K.square(K.exp(z_log_sigmaFull)), axis=-1)
-            total_loss = K.mean(reconstruction_loss + kl_loss)
-            return total_loss
-
         # Loss function for the left VAE
         # Loss function comprised of two parts, Cross_entropy, and
         # divergence
@@ -102,51 +92,33 @@ class shared_vae_class(object):
         leftEncoderFirstLayer = Dense(
             self.params.firstLayerSizeLeft,
             activation='relu')(leftEncoderInput)
-        leftEncoderSecondLayer = Dense(
-            self.params.secondLayerSize,
-            activation='relu')(leftEncoderFirstLayer)
 
         rightEncoderInput = Input(shape=(self.params.inputSizeRight,))
         rightEncoderFirstLayer = Dense(
             self.params.firstLayerSizeRight,
             activation='relu')(rightEncoderInput)
-        rightEncoderSecondLayer = Dense(
-            self.params.secondLayerSize,
-            activation='relu')(rightEncoderFirstLayer)
 
         encoderMergeLayer = Dense(
             self.params.thirdLayerSize, activation='relu')
-        leftMerge = encoderMergeLayer(leftEncoderSecondLayer)
-        rightMerge = encoderMergeLayer(rightEncoderSecondLayer)
-
-        # These different merge branches are used in different models
-        mergedLayer = keras.layers.average([leftMerge, rightMerge])
-        leftMergedLayer = keras.layers.average([leftMerge, leftMerge])
-        rightMergedLayer = keras.layers.average(
-            [rightMerge, rightMerge])
+        leftMerge = encoderMergeLayer(leftEncoderFirstLayer)
+        rightMerge = encoderMergeLayer(rightEncoderFirstLayer)
 
         z_mean = Dense(self.params.encodedSize)
         z_log_sigma = Dense(self.params.encodedSize)
 
         # These three sets are used in differen models
-        z_meanLeft = z_mean(leftMergedLayer)
-        z_log_sigmaLeft = z_log_sigma(leftMergedLayer)
+        z_meanLeft = z_mean(leftMerge)
+        z_log_sigmaLeft = z_log_sigma(leftMerge)
 
-        z_meanRight = z_mean(rightMergedLayer)
-        z_log_sigmaRight = z_log_sigma(rightMergedLayer)
-
-        z_meanFull = z_mean(mergedLayer)
-        z_log_sigmaFull = z_log_sigma(mergedLayer)
+        z_meanRight = z_mean(rightMerge)
+        z_log_sigmaRight = z_log_sigma(rightMerge)
 
         zLeft = Lambda(sampling)([z_meanLeft, z_log_sigmaLeft])
         zRight = Lambda(sampling)([z_meanRight, z_log_sigmaRight])
-        zFull = Lambda(sampling)([z_meanFull, z_log_sigmaFull])
 
         # These are the three different models
-        leftEncoder = Model(leftEncoderInput, zLeft)
-        rightEncoder = Model(rightEncoderInput, zRight)
-        self.fullEncoder = Model(
-            [leftEncoderInput, rightEncoderInput], zFull)
+        self.leftEncoder = Model(leftEncoderInput, zLeft)
+        self.rightEncoder = Model(rightEncoderInput, zRight)
 
         # Defining the Decoder with Left and Right Outputs
         decoderInputs = Input(shape=(self.params.encodedSize,))
@@ -154,22 +126,16 @@ class shared_vae_class(object):
             self.params.thirdLayerSize,
             activation='relu')(decoderInputs)
 
-        leftDecoderSecondLayer = Dense(
-            self.params.secondLayerSize,
-            activation='relu')(decoderFirstLayer)
         leftDecoderThirdLayer = Dense(
             self.params.firstLayerSizeLeft,
-            activation='relu')(leftDecoderSecondLayer)
+            activation='relu')(decoderFirstLayer)
         leftDecoderOutput = Dense(
             self.params.inputSizeLeft,
             activation='sigmoid')(leftDecoderThirdLayer)
 
-        rightDecoderSecondLayer = Dense(
-            self.params.secondLayerSize,
-            activation='relu')(decoderFirstLayer)
         rightDecoderThirdLayer = Dense(
             self.params.firstLayerSizeRight,
-            activation='relu')(rightDecoderSecondLayer)
+            activation='relu')(decoderFirstLayer)
         rightDecoderOutput = Dense(
             self.params.inputSizeRight,
             activation='sigmoid')(rightDecoderThirdLayer)
@@ -182,141 +148,36 @@ class shared_vae_class(object):
         # decoder.summary()
 
         # Left to Right transition
-        outputs = self.fullDecoder(leftEncoder(leftEncoderInput))
+        outputs = self.fullDecoder(self.leftEncoder(leftEncoderInput))
         self.leftToRightModel = Model(leftEncoderInput, outputs)
         # leftToRightModel.summary()
 
         # Right to Left transition
-        outputs = self.fullDecoder(rightEncoder(rightEncoderInput))
+        outputs = self.fullDecoder(self.rightEncoder(rightEncoderInput))
         self.rightToLeftModel = Model(rightEncoderInput, outputs)
-        self.rightToLeftModel.compile(optimizer='Adam',
-                                      loss=vae_loss)
         # rightToLeftModel.summary()
 
         # TESTINGINGINGINGINGING
-        outputs = rightDecoder(leftEncoder(leftEncoderInput))
+        outputs = rightDecoder(self.leftEncoder(leftEncoderInput))
         self.leftToRightTransitionModel = Model(leftEncoderInput, outputs)
         self.leftToRightTransitionModel.compile(optimizer='Adam',
                                                 loss=left_vae_loss)
 
         # TESTINGINGINGINGINGING
-        outputs = leftDecoder(rightEncoder(rightEncoderInput))
+        outputs = leftDecoder(self.rightEncoder(rightEncoderInput))
         self.rightToLeftTransitionModel = Model(rightEncoderInput, outputs)
         self.rightToLeftTransitionModel.compile(optimizer='Adam',
                                                 loss=right_vae_loss)
 
-        # Full Model
-        outputs = self.fullDecoder(self.fullEncoder(
-            [leftEncoderInput, rightEncoderInput]))
-        # Create the full model
-        self.vae_model = Model(
-            [leftEncoderInput, rightEncoderInput], outputs)
-        lowLearnAdam = keras.optimizers.Adam(
-            lr=0.001, beta_1=0.9, beta_2=0.999,
-            epsilon=None, decay=0.0, amsgrad=False)
-        self.vae_model.compile(optimizer=lowLearnAdam,
-                               loss=vae_loss)  # Compile
-        # vae_model.summary()
-
-        # Freeze all shared layers
-        leftMerge.trainable = False
-        rightMerge.trainable = False
-
-        mergedLayer.trainable = False
-        leftMergedLayer.trainable = False
-        rightMergedLayer.trainable = False
-
-        z_meanLeft.trainable = False
-        z_log_sigmaLeft.trainable = False
-
-        z_meanRight.trainable = False
-        z_log_sigmaRight.trainable = False
-
-        z_meanFull.trainable = False
-        z_log_sigmaFull.trainable = False
-
-        zLeft.trainable = False
-        zRight.trainable = False
-        zFull.trainable = False
-
-        decoderFirstLayer.trainable = False
-
-        # Left VAE model which can't train middle
-        outputs = leftDecoder(leftEncoder(leftEncoderInput))
+        outputs = leftDecoder(self.leftEncoder(leftEncoderInput))
         self.leftModel = Model(leftEncoderInput, outputs)
         self.leftModel.compile(
-            optimizer=lowLearnAdam, loss=left_vae_loss)
+            optimizer='Adam', loss=left_vae_loss)
 
-        # Right VAE model which can't train middle
-        outputs = rightDecoder(rightEncoder(rightEncoderInput))
+        outputs = rightDecoder(self.rightEncoder(rightEncoderInput))
         self.rightModel = Model(rightEncoderInput, outputs)
         self.rightModel.compile(
-            optimizer=lowLearnAdam, loss=right_vae_loss)
-
-        # Make shared layers trainable
-        leftMerge.trainable = True
-        rightMerge.trainable = True
-
-        mergedLayer.trainable = True
-        leftMergedLayer.trainable = True
-        rightMergedLayer.trainable = True
-
-        z_meanLeft.trainable = True
-        z_log_sigmaLeft.trainable = True
-
-        z_meanRight.trainable = True
-        z_log_sigmaRight.trainable = True
-
-        z_meanFull.trainable = True
-        z_log_sigmaFull.trainable = True
-
-        zLeft.trainable = True
-        zRight.trainable = True
-        zFull.trainable = True
-
-        decoderFirstLayer.trainable = True
-
-        # Make separate layers frozen
-        leftEncoderFirstLayer.trainable = False
-        leftEncoderSecondLayer.trainable = False
-
-        rightEncoderFirstLayer.trainable = False
-        rightEncoderSecondLayer.trainable = False
-
-        leftDecoderSecondLayer.trainable = False
-        leftDecoderThirdLayer.trainable = False
-        leftDecoderOutput.trainable = False
-
-        rightDecoderSecondLayer.trainable = False
-        rightDecoderThirdLayer.trainable = False
-        rightDecoderOutput.trainable = False
-
-        # Define center model
-        outputs = self.fullDecoder(self.fullEncoder(
-            [leftEncoderInput, rightEncoderInput]))
-        # Create the center model
-        self.centerModel = Model(
-            [leftEncoderInput, rightEncoderInput], outputs)
-        self.centerModel.compile(
-            optimizer=lowLearnAdam, loss=vae_loss)  # Compile
-
-        plot_model(self.fullEncoder,
-                   to_file=os.path.join('Output',
-                                        str(self.params.dataSetInfo.name),
-                                        ('sharedVaeFullEncoder'
-                                         '{}_{}_{}_{}_{}_{}_{}.png')
-                                        .format(str(self.params.numEpochs),
-                                                str(self.params.
-                                                    firstLayerSizeLeft),
-                                                str(self.params.inputSizeLeft),
-                                                str(self.params.
-                                                    secondLayerSize),
-                                                str(self.params.encodedSize),
-                                                str(self.params.
-                                                    firstLayerSizeRight),
-                                                str(self.params.
-                                                    inputSizeRight))),
-                   show_shapes=True)
+            optimizer='Adam', loss=right_vae_loss)
 
     def train_model(self, leftDomain, rightDomain, denoising):
         """
@@ -359,77 +220,15 @@ class shared_vae_class(object):
                            callbacks=[callback],
                            verbose=1)
         '''
-        # Take turns training each part of the model separately
-        vae_loss_data = []
-        vae_loss_callback = custom_callback(vae_loss_data)
-
-        left_vae_loss_data = []
-        left_callback = custom_callback(left_vae_loss_data)
-
-        right_vae_loss_data = []
-        right_callback = custom_callback(right_vae_loss_data)
 
         for i in range(self.params.numEpochs):
-            print("On EPOCH: " + repr(i + 1)) 
-            self.vae_model.fit([leftDomain_noisy, rightDomain_noisy],
-                               [leftDomain, rightDomain],
-                               epochs=1,
-                               batch_size=self.params.batchSize,
-                               shuffle=True,
-                               callbacks=[callback, vae_loss_callback])
+            print("On EPOCH: " + repr(i + 1))
             self.leftModel.fit(leftDomain_noisy, leftDomain,
                                epochs=1,
                                batch_size=self.params.batchSize)
             self.rightModel.fit(rightDomain_noisy, rightDomain,
                                 epochs=1,
                                 batch_size=self.params.batchSize)
-
-            self.centerModel.fit([leftDomain_noisy, rightDomain_noisy],
-                                 [leftDomain, rightDomain],
-                                 epochs=1,
-                                 batch_size=self.params.batchSize,
-                                 shuffle=True,
-                                 callbacks=[callback])
-
-            self.leftToRightTransitionModel.fit(leftDomain_noisy,
-                                                rightDomain,
-                                                epochs=1,
-                                                batch_size=self.params.
-                                                batchSize,
-                                                shuffle=True,
-                                                callbacks=[callback,
-                                                           left_callback])
-            self.rightToLeftTransitionModel.fit(rightDomain_noisy,
-                                                leftDomain,
-                                                epochs=1,
-                                                batch_size=self.params.
-                                                batchSize,
-                                                shuffle=True,
-                                                callbacks=[callback,
-                                                           right_callback])
-
-        import seaborn as sns
-        import matplotlib.pyplot as plt
-        import pandas as pd
-
-        sns.set_style("darkgrid")
-        data = np.vstack((vae_loss_data, left_vae_loss_data, right_vae_loss_data))
-
-        output_df = pd.DataFrame(data, ["Whole VAE Loss", "Left to Right Loss", "Right to Left Loss"]).T
-        output_df.plot()
-
-        # save the output
-        plt.savefig(os.path.join('Output', str(self.params.dataSetInfo.name),
-                                 'Loss_{}_{}_{}_{}_{}_{}_{}_{}_{}.png'.
-                                 format(str(vae_loss_data[-1]),
-                                        str(self.params.numEpochs),
-                                        str(self.params.firstLayerSizeLeft),
-                                        str(self.params.inputSizeLeft),
-                                        str(self.params.secondLayerSize),
-                                        str(self.params.thirdLayerSize),
-                                        str(self.params.encodedSize),
-                                        str(self.params.firstLayerSizeRight),
-                                        str(self.params.inputSizeRight))))
         # plt.show()
 
     def generate(self, leftDomain, rightDomain):
@@ -445,8 +244,9 @@ class shared_vae_class(object):
         """
 
         # Create generated data
-        predicted = self.fullEncoder.predict([leftDomain, rightDomain],
+        predicted = self.leftEncoder.predict(leftDomain,
                                              batch_size=self.params.batchSize)
+
         max_coords = np.amax(predicted, axis=0)
         min_coords = np.amin(predicted, axis=0)
 
