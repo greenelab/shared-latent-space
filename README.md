@@ -3,10 +3,10 @@
 ## Motivation for application of Shared Latent SPace VAE's In Biology
 
 Variational Autoencoders are machine learning models which learn the distribution of the data in a latent space manifold.
-This allows the model to be trainned on unsuprivesed data, but learning to recreate the input data, and also allows the model to
+This allows the model to be trained on unsuprivesed data, but learning to recreate the input data, and also allows the model to
 create new data that ressembles the original data by picking points in the lantent space manifold.
 Shared Latent Space VAE's find relationships between two different domains and allow for transformations between the two.
-They achieve this by linking the lantent space manifold between two differen encoders and decoders.
+They achieve this by linking the lantent space manifold between two different encoders and decoders.
 This is particularly useful in Biology where we could use different data types as different 'views'
 on the same biological problem.
 The ability to transform between domains also allows us to transition between different data types.
@@ -22,7 +22,7 @@ All libraries and packages are handled by conda and specified in the `enviroment
 To build and activate this enviroment, run:
 ```
 #conda version 4.4.10
-conda env create --force --file enviroment.yml
+conda env create --force --file environment.yml
 
 conda activate shared-latenet-space
 ```
@@ -32,7 +32,7 @@ conda activate shared-latenet-space
 The pickle files for MNIST and ICVL are both too big to include on the repo.
 They are publically available and I will later provide an easy way to download them that will be consistent among platforms.
 You should consider changing the layout of the model, which is controlled in the intialization of the model_parameters object in main_file.py.
-You can also control the noise leve as a parameter to the train function also located inside main_file.py.
+You can also control the noise level as a parameter to the train function also located inside main_file.py.
 
 ### Changing Datasets
 
