@@ -211,24 +211,32 @@ class shared_vae_class(object):
         callback = EarlyStopping(monitor='loss',
                                  patience=3, verbose=0, mode='auto')
 
-        # Train the combined model
-        '''self.vae_model.fit([leftDomain_noisy, rightDomain_noisy],
-                           [leftDomain, rightDomain],
-                           epochs=self.params.numEpochs,
-                           batch_size=self.params.batchSize,
-                           shuffle=True,
-                           callbacks=[callback],
-                           verbose=1)
-        '''
+        left_vae_loss_data = []
+        left_callback = custom_callback(left_vae_loss_data)
+
+        right_vae_loss_data = []
+        right_callback = custom_callback(right_vae_loss_data)
 
         for i in range(self.params.numEpochs):
             print("On EPOCH: " + repr(i + 1))
             self.leftModel.fit(leftDomain_noisy, leftDomain,
                                epochs=1,
-                               batch_size=self.params.batchSize)
+                               batch_size=self.params.batchSize,
+                               callback=[left_callback])
             self.rightModel.fit(rightDomain_noisy, rightDomain,
                                 epochs=1,
-                                batch_size=self.params.batchSize)
+                                batch_size=self.params.batchSize,
+                                callback=[right_callback])
+
+        import seaborn as sns
+        import matplotlib.pyplot as plt
+        import pandas as pd
+
+        sns.set_style("darkgrid")
+        data = np.vstack((left_vae_loss_data, right_vae_loss_data))
+
+        output_df = pd.DataFrame(data, ["Left to Right Loss", "Right to Left Loss"]).T
+        output_df.plot()
         # plt.show()
 
     def generate(self, leftDomain, rightDomain):

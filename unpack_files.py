@@ -39,7 +39,7 @@ def unpackFiles(name):
 
     # Write decompressed file
     with open(train_file_to_write) as f:
-        f_in.write(file_content)
+        f.write(file_content)
 
     # Open compressed file
     with gzip.open(test_file_to_read) as f:
@@ -47,3 +47,4 @@ def unpackFiles(name):
 
     # Write decompressed file
     with open(test_file_to_write) as f:
+        f.write(file_content)
