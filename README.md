@@ -18,7 +18,7 @@ The ability to transform between domains also allows us to transition between di
 
 ### Computational Environment
 
-All libraries and packages are handled by conda and specified in the `enviroment.yml` file.
+All libraries and packages are handled by conda and specified in the `environment.yml` file.
 To build and activate this enviroment, run:
 ```
 #conda version 4.4.10
