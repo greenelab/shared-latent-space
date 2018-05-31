@@ -409,8 +409,10 @@ class shared_vae_class(object):
                                           rightToLeftImgs, self.params)
 
         # Find the Difference in the cycles
-        leftCycleDifference = left_decoded_imgs - leftToRightCycle
-        rightCycleDifference = right_decoded_imgs - rightToLeftCycle
+        leftCycleDifference = (np.absolute(left_decoded_imgs)
+                               - np.absolute(leftToRightCycle))
+        rightCycleDifference = (np.absolute(right_decoded_imgs)
+                                - np.absolute(rightToLeftCycle))
 
         # Print Average Cycle Differences
         print("Left Cycle Difference: " +
@@ -440,10 +442,10 @@ class shared_vae_class(object):
         (_, rightToLeftCycleNoise) = self.leftToRightModel.predict(
             rightToLeftImgsNoise)
 
-        leftCycleDifferenceNoise = (left_decoded_imgs_noise -
-                                    leftToRightCycleNoise)
-        rightCycleDifferenceNoise = (right_decoded_imgs_noise -
-                                     rightToLeftCycleNoise)
+        leftCycleDifferenceNoise = (np.absolute(left_decoded_imgs_noise)
+                                    - np.absolute(leftToRightCycleNoise))
+        rightCycleDifferenceNoise = (np.absolute(right_decoded_imgs_noise)
+                                     - np.absolute(rightToLeftCycleNoise))
 
         print("Left Cycle Noise Difference: " +
               repr(np.sum(leftCycleDifferenceNoise) / leftDomain.shape[0]))

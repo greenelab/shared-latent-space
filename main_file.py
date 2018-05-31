@@ -30,12 +30,18 @@ import numpy as np
 import ICVL
 import MNIST
 
+from unpack_files import unpackFiles
 from shared_vae_class import shared_vae_class
 from model_objects import model_parameters
 # MNIST 28x28
 # ICVL 60x80
 
-dataSetInfo = ICVL.dataInfo()
+dataSetInfo = MNIST.dataInfo()
+
+if not os.path.exists(os.path.join('Data', 'Training',
+                                   '{}_Training.pkl'.format(dataSetInfo.
+                                                            name))):
+    unpackFiles(dataSetInfo.name)
 
 (x_train, a_train, x_test, a_test) = dataSetInfo.load()
 
@@ -52,6 +58,7 @@ model_parameters = model_parameters(
     inputSizeRight=a_train.shape[1],
     firstLayerSizeRight=1024,
     dataSetInfo=dataSetInfo)
+
 
 # Create the model with the parameters
 shared_vae = shared_vae_class(model_parameters)

@@ -26,6 +26,7 @@ from keras.datasets import mnist
 # Local Files
 from model_objects import model_parameters
 from DataSetInfoAbstractClass import dataSetInfoAbstract
+import cPickle
 
 
 class dataInfo(dataSetInfoAbstract):
@@ -60,9 +61,8 @@ class dataInfo(dataSetInfoAbstract):
         # Loading the MNIST Data
         with open(self.training_file, "rb") as fp:
             (x_train, a_train) = cPickle.load(fp)
-
-            with open(self.testing_file, "rb") as fp:
-                (x_test, a_test) = cPickle.load(fp)
+        with open(self.testing_file, "rb") as fp:
+            (x_test, a_test) = cPickle.load(fp)
         return (x_train, a_train, x_test, a_test)
 
     def visualize(self, randIndexes, rightDomain, right_decoded_imgs,
@@ -191,6 +191,7 @@ class dataInfo(dataSetInfoAbstract):
             ax = plt.subplot(12, n, i + 1 + 8 * n)
             plt.imshow(rightToLeftCycle[randIndexes[i]].reshape(self.Xdim,
                                                                 self.Ydim))
+
             plt.gray()
             ax.get_xaxis().set_visible(False)
             ax.get_yaxis().set_visible(False)
