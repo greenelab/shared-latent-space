@@ -50,6 +50,9 @@ class shared_vae_class(object):
         Returns: None
         """
         self.params = model_parameters
+        self.betaRight = K.variable(0)
+        self.betaLeft = K.variable(0)
+        self.kappa = self.params.kappa
 
     def compile_model(self):
         """
@@ -74,7 +77,8 @@ class shared_vae_class(object):
             reconstruction_loss = K.sum(K.square(finalLayer - inputs))
             kl_loss = - 0.5 * K.sum(1 + z_log_sigmaLeft - K.square(
                 z_meanLeft) - K.square(K.exp(z_log_sigmaLeft)), axis=-1)
-            total_loss = K.mean(reconstruction_loss + kl_loss)
+            total_loss = K.mean(reconstruction_loss +
+                                (K.get_value(self.betaLeft) * kl_loss))
             return total_loss
 
         # Loss function for the right VAE
@@ -84,7 +88,8 @@ class shared_vae_class(object):
             reconstruction_loss = K.sum(K.square(finalLayer - inputs))
             kl_loss = - 0.5 * K.sum(1 + z_log_sigmaRight - K.square(
                 z_meanRight) - K.square(K.exp(z_log_sigmaRight)), axis=-1)
-            total_loss = K.mean(reconstruction_loss + kl_loss)
+            total_loss = K.mean(reconstruction_loss +
+                                (K.get_value(self.betaRight) * kl_loss))
             return total_loss
 
         # Define the Encoder with the Left and Right branches
@@ -157,18 +162,6 @@ class shared_vae_class(object):
         self.rightToLeftModel = Model(rightEncoderInput, outputs)
         # rightToLeftModel.summary()
 
-        # TESTINGINGINGINGINGING
-        outputs = rightDecoder(self.leftEncoder(leftEncoderInput))
-        self.leftToRightTransitionModel = Model(leftEncoderInput, outputs)
-        self.leftToRightTransitionModel.compile(optimizer='Adam',
-                                                loss=left_vae_loss)
-
-        # TESTINGINGINGINGINGING
-        outputs = leftDecoder(self.rightEncoder(rightEncoderInput))
-        self.rightToLeftTransitionModel = Model(rightEncoderInput, outputs)
-        self.rightToLeftTransitionModel.compile(optimizer='Adam',
-                                                loss=right_vae_loss)
-
         outputs = leftDecoder(self.leftEncoder(leftEncoderInput))
         self.leftModel = Model(leftEncoderInput, outputs)
         self.leftModel.compile(
@@ -208,9 +201,6 @@ class shared_vae_class(object):
             leftDomain_noisy = leftDomain
             rightDomain_noisy = rightDomain
 
-        callback = EarlyStopping(monitor='loss',
-                                 patience=3, verbose=0, mode='auto')
-
         left_vae_loss_data = []
         left_callback = custom_callback(left_vae_loss_data)
 
@@ -222,11 +212,15 @@ class shared_vae_class(object):
             self.leftModel.fit(leftDomain_noisy, leftDomain,
                                epochs=1,
                                batch_size=self.params.batchSize,
-                               callback=[left_callback])
+                               callbacks=[left_callback,
+                                          WarmUpCallback(self.betaleft,
+                                                         self.kappa)])
             self.rightModel.fit(rightDomain_noisy, rightDomain,
                                 epochs=1,
                                 batch_size=self.params.batchSize,
-                                callback=[right_callback])
+                                callbacks=[right_callback,
+                                           WarmUpCallback(self.betaRight,
+                                                          self.kappa)])
 
         import seaborn as sns
         import matplotlib.pyplot as plt
@@ -235,7 +229,9 @@ class shared_vae_class(object):
         sns.set_style("darkgrid")
         data = np.vstack((left_vae_loss_data, right_vae_loss_data))
 
-        output_df = pd.DataFrame(data, ["Left to Right Loss", "Right to Left Loss"]).T
+        output_df = pd.DataFrame(data, [self.params.dataSetInfo.leftDomainName,
+                                        self.params.dataSetInfo.rightDomainName
+                                        ]).T
         output_df.plot()
         # plt.show()
 
@@ -337,3 +333,14 @@ class custom_callback(Callback):
 
     def on_epoch_end(self, epoch, logs={}):
         self.loss_data.append(logs.get('loss'))
+
+
+class WarmUpCallback(Callback):
+    def __init__(self, beta, kappa):
+        self.beta = beta
+        self.kappa = kappa
+
+    # Behavior on each epoch
+    def on_epoch_end(self, epoch, logs={}):
+        if K.get_value(self.beta) <= 1:
+            K.set_value(self.beta, K.get_value(self.beta) + self.kappa)

@@ -32,7 +32,7 @@ class dataInfo(dataSetInfoAbstract):
 
     def __init__(self):
         """
-        Defines the object's name and image size
+        Defines the object's name, file locations, image size and domain names
 
         Args: None
 
@@ -45,6 +45,8 @@ class dataInfo(dataSetInfoAbstract):
                                          'MNIST_Testing.pkl')
         self.Xdim = 28
         self.Ydim = 28
+        self.rightDomainName = "White Backed"
+        self.leftDomainName = "Black Backed"
 
     def load(self):
         """

@@ -54,6 +54,8 @@ def get_args():
                         help="Encdoded size", type=int)
     parser.add_argument("--firstLayerSizeRight",  help="Right firstlayer size",
                         type=int)
+    parser.add_argument("--kappa",  help="Right firstlayer size",
+                        type=float, default=.1)
     args = parser.parse_args()
     return args
 
@@ -95,6 +97,7 @@ model_parameters = model_parameters(
     encodedSize=args.encodedSize,
     inputSizeRight=a_train.shape[1],
     firstLayerSizeRight=args.firstLayerSizeRight,
+    kappa=args.kappa,
     dataSetInfo=dataSetInfo)
 
 # Create the model with the parameters

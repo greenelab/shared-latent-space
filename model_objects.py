@@ -14,7 +14,7 @@ class model_parameters(object):
 
     def __init__(self, batchSize, numEpochs, inputSizeLeft,
                  firstLayerSizeLeft, secondLayerSize, thirdLayerSize,
-                 encodedSize, inputSizeRight, firstLayerSizeRight,
+                 encodedSize, inputSizeRight, firstLayerSizeRight, kappa,
                  dataSetInfo):
         """
         Takes in parameters of the model and data set info.
@@ -44,5 +44,7 @@ class model_parameters(object):
 
         self.inputSizeRight = inputSizeRight
         self.firstLayerSizeRight = firstLayerSizeRight
+
+        self.kappa = kappa
 
         self.dataSetInfo = dataSetInfo

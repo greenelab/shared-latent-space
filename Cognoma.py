@@ -30,7 +30,7 @@ class dataInfo(dataSetInfoAbstract):
 
     def __init__(self):
         """
-        Defines the object's name, file locations and image size
+        Defines the object's name, file locations, image size and domain names
 
         Args: None
 
@@ -45,6 +45,8 @@ class dataInfo(dataSetInfoAbstract):
         self.rightYDim = 36
         self.leftXDim = 100
         self.leftYDim = 80
+        self.rightDomainName = "Mutation"
+        self.leftDomainName = "Expression"
 
     def load(self):
         """
@@ -107,7 +109,7 @@ class dataInfo(dataSetInfoAbstract):
         for i in range(10):
 
             # display original Depth Map
-            ax = plt.subplot(4, 10, i + 1)
+            ax = plt.subplot(6, 10, i + 1)
             plt.imshow(rightDomainFloat[randIndexes[i]].
                        reshape(self.rightXDim,
                                self.rightYDim))
@@ -117,7 +119,7 @@ class dataInfo(dataSetInfoAbstract):
                 ax.set_title("Right Domain (Mutated) Truth")
 
             # display depth map reconstruction
-            ax = plt.subplot(4, 10, i + 1 + 10)
+            ax = plt.subplot(6, 10, i + 1 + 10)
             plt.imshow(right_decoded_imgs[randIndexes[i]]
                        .reshape(self.rightXDim,
                                 self.rightYDim))
@@ -126,8 +128,18 @@ class dataInfo(dataSetInfoAbstract):
             if (i == 0):
                 ax.set_title("Right Domain (Mutated) Reconstructed")
 
+            # display depth map reconstruction
+            ax = plt.subplot(6, 10, i + 1 + 2 * 10)
+            plt.imshow(rightToLeftImgs[randIndexes[i]]
+                       .reshape(self.leftXDim,
+                                self.leftYDim))
+            ax.get_xaxis().set_visible(False)
+            ax.get_yaxis().set_visible(False)
+            if (i == 0):
+                ax.set_title("Right Domain (Mutated) translated into Left")
+
             # display right to left transformed cycled through
-            ax = plt.subplot(4, 10, i + 1 + 2 * 10)
+            ax = plt.subplot(6, 10, i + 1 + 3 * 10)
             plt.imshow(leftDomain[randIndexes[i]].reshape(self.leftXDim,
                                                           self.leftYDim))
             ax.get_xaxis().set_visible(False)
@@ -136,7 +148,7 @@ class dataInfo(dataSetInfoAbstract):
                 ax.set_title("Left Domain (Expression) Truth")
 
             # display depth generated
-            ax = plt.subplot(4, 10, i + 1 + 3 * 10)
+            ax = plt.subplot(6, 10, i + 1 + 4 * 10)
             plt.imshow(left_decoded_imgs[randIndexes[i]]
                        .reshape(self.leftXDim,
                                 self.leftYDim))
@@ -144,6 +156,16 @@ class dataInfo(dataSetInfoAbstract):
             ax.get_yaxis().set_visible(False)
             if (i == 0):
                 ax.set_title("Left Domain (Expression) Reconstructed")
+
+            # display depth generated
+            ax = plt.subplot(6, 10, i + 1 + 5 * 10)
+            plt.imshow(right_decoded_imgs[randIndexes[i]]
+                       .reshape(self.rightXDim,
+                                self.rightYDim))
+            ax.get_xaxis().set_visible(False)
+            ax.get_yaxis().set_visible(False)
+            if (i == 0):
+                ax.set_title("Left Domain (Expression) translated into Right")
 
         plt.savefig(os.path.join('Output', 'Cognoma',
                                  'Visualized_{}_{}_{}_{}_{}_{}_{}_{}.png'.

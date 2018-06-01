@@ -29,7 +29,7 @@ class dataInfo(dataSetInfoAbstract):
 
     def __init__(self):
         """
-        Defines the object's name, file locations and image size
+        Defines the object's name, file locations, image size and domain names
 
         Args: None
 
@@ -42,6 +42,8 @@ class dataInfo(dataSetInfoAbstract):
                                          'ICVL_Testing.pkl')
         self.Xdim = 60
         self.Ydim = 80
+        self.rightDomainName = "Joints"
+        self.leftDomainName = "Depth Map"
 
     def load(self):
         """
