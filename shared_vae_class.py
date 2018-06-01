@@ -213,7 +213,7 @@ class shared_vae_class(object):
                                epochs=1,
                                batch_size=self.params.batchSize,
                                callbacks=[left_callback,
-                                          WarmUpCallback(self.betaleft,
+                                          WarmUpCallback(self.betaLeft,
                                                          self.kappa)])
             self.rightModel.fit(rightDomain_noisy, rightDomain,
                                 epochs=1,
