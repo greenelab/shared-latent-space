@@ -54,8 +54,12 @@ def get_args():
                         help="Encdoded size", type=int)
     parser.add_argument("--firstLayerSizeRight",  help="Right firstlayer size",
                         type=int)
-    parser.add_argument("--kappa",  help="Right firstlayer size",
+    parser.add_argument("--kappa",  help="Kappa for warmstart",
                         type=float, default=.1)
+    parser.add_argument("--noise",  help="Noise",
+                        type=float, default=0)
+    parser.add_argument("--notes",  help="Notes",
+                        type=str, default="N/A")
     args = parser.parse_args()
     return args
 
@@ -84,9 +88,10 @@ print("Finished Loading")
 print x_train.shape
 print a_train.shape
 
-
 if not os.path.exists(os.path.join('Output', dataSetInfo.name)):
     os.mkdir(os.path.join('Output', dataSetInfo.name))
+
+
 
 model_parameters = model_parameters(
     batchSize=args.batchSize, numEpochs=args.numEpochs,
@@ -98,7 +103,12 @@ model_parameters = model_parameters(
     inputSizeRight=a_train.shape[1],
     firstLayerSizeRight=args.firstLayerSizeRight,
     kappa=args.kappa,
+    noise=args.noise,
+    notes=args.notes,
     dataSetInfo=dataSetInfo)
+
+while os.path.exists(os.path.join('Output', dataSetInfo.name, "{}.html".format(model_parameters.outputNum))):
+    model_parameters.outputNum += 1
 
 # Create the model with the parameters
 shared_vae = shared_vae_class(model_parameters)
@@ -106,5 +116,5 @@ shared_vae = shared_vae_class(model_parameters)
 shared_vae.compile_model()
 
 # Train the model with: left domain, right domain, and noise
-shared_vae.train_model(x_train, a_train, 0)
-shared_vae.generate(x_train, a_train)
+shared_vae.train_model(x_train, a_train, x_test, a_test, 0)
+shared_vae.generate(x_test, a_test)

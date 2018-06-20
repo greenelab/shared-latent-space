@@ -66,7 +66,9 @@ class dataInfo(dataSetInfoAbstract):
             (x_test, a_test) = cPickle.load(fp)
         return (x_train, a_train, x_test, a_test)
 
-    def visualize(self, rightDomain, right_decoded_imgs,
+    def visualize(self, leftEncoder, rightEncoder,
+                  leftToRightModel, rightToLeftModel,
+                  leftPredicted, rightPredicted, rightDomain, right_decoded_imgs,
                   rightToLeftCycle, right_generatedImgs, leftToRightImgs,
                   leftDomain, left_decoded_imgs, leftToRightCycle,
                   left_generatedImgs, rightToLeftImgs, params, n=10):
@@ -74,6 +76,8 @@ class dataInfo(dataSetInfoAbstract):
         Visualizes all of the data passed to it.
 
         Args:
+            leftPredicted (array of floats): The latent space predictions
+            rightPredicted (array of floats): The latent space predictions
             rightDomain (array of floats): Right input.
             right_decoded_imgs (array of floats): Right input
                                                   encoded and decoded.
@@ -208,14 +212,7 @@ class dataInfo(dataSetInfoAbstract):
             if (i == 0):
                 ax.set_title("Right Generated")
         plt.savefig(os.path.join('Output', 'MNIST',
-                                 'Output_{}_{}_{}_{}_{}_{}_{}_{}.png'.
-                                 format(str(params.numEpochs),
-                                        str(params.firstLayerSizeLeft),
-                                        str(params.inputSizeLeft),
-                                        str(params.secondLayerSize),
-                                        str(params.thirdLayerSize),
-                                        str(params.encodedSize),
-                                        str(params.firstLayerSizeRight),
-                                        str(params.inputSizeRight))))
+                                 'Output_{}.png'.
+                                 format(str(params.outputNum))))
         plt.show()
         return

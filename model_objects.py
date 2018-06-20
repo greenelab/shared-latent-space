@@ -13,9 +13,11 @@ Date: 5/22/18
 class model_parameters(object):
 
     def __init__(self, batchSize, numEpochs, inputSizeLeft,
-                 firstLayerSizeLeft, secondLayerSize, thirdLayerSize,
+                 firstLayerSizeLeft,
+                 secondLayerSize,
+                 thirdLayerSize,
                  encodedSize, inputSizeRight, firstLayerSizeRight, kappa,
-                 dataSetInfo):
+                 noise, notes, dataSetInfo):
         """
         Takes in parameters of the model and data set info.
 
@@ -46,5 +48,9 @@ class model_parameters(object):
         self.firstLayerSizeRight = firstLayerSizeRight
 
         self.kappa = kappa
+        self.noise = noise
+
+        self.notes = notes
 
         self.dataSetInfo = dataSetInfo
+        self.outputNum = 0

@@ -31,7 +31,9 @@ class dataSetInfoAbstract(object):
         return
 
     @abstractmethod
-    def visualize(self, rightDomain, right_decoded_imgs,
+    def visualize(self, leftEncoder, rightEncoder,
+                  leftToRightModel, rightToLeftModel,
+                  leftPredicted, rightPredicted, rightDomain, right_decoded_imgs,
                   rightToLeftCycle, right_generatedImgs, leftToRightImgs,
                   leftDomain, left_decoded_imgs, leftToRightCycle,
                   left_generatedImgs, rightToLeftImgs, params, n):
@@ -40,6 +42,10 @@ class dataSetInfoAbstract(object):
         anything.
 
         Args:
+            leftToRightModel (keras model): translation model
+            rightToLeftModel (keras model): translation
+            leftPredicted (array of floats): The latent space predictions
+            rightPredicted (array of floats): The latent space predictions
             rightDomain (array of floats): Right input.
             right_decoded_imgs (array of floats): Right input
                                                   encoded and decoded.
