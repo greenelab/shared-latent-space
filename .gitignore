@@ -6,3 +6,5 @@ vae.py
 __pycache__/
 *.tsv
 *.bz2
+pipeline.py
+Data/

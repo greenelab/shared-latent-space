@@ -140,11 +140,14 @@ class dataInfo(dataSetInfoAbstract):
                 TP53NotExp = np.vstack((TP53NotExp, leftDomain[x, :]))
 
         randIndexes = np.random.randint(
-            0, min(TP53Wildtype.shape[0], TP53Not.shape[0]) - 1, (100,))
+            0, min(TP53Wildtype.shape[0], TP53Not.shape[0]) - 1,
+            (min(TP53Wildtype.shape[0], TP53Not.shape[0]),))
         TP53Wildtype = TP53Wildtype[1:]
         TP53WildtypeExp = TP53WildtypeExp[1:]
         TP53Wildtype = TP53Wildtype[randIndexes]
         TP53WildtypeExp = TP53WildtypeExp[randIndexes]
+
+        print randIndexes.shape
 
         TP53Not = TP53Not[1:]
         TP53NotExp = TP53NotExp[1:]
@@ -193,39 +196,45 @@ class dataInfo(dataSetInfoAbstract):
         (TP53NotInducedToExp, _) = modelHandle.rightToLeftModel.predict(
                                                                 TP53NotInduced)
 
-        SyntheticPVals = np.array([])
+        SyntheticStat = np.array([])
         for x in range(0, leftDomain.shape[0]):
             ttest_results = scipy.stats.ttest_ind(
                 TP53WildtypeExp[:, x], TP53InducedToExp[:, x])
-            SyntheticPVals = np.append(SyntheticPVals, ttest_results.statistic)
+            SyntheticStat = np.append(SyntheticStat, ttest_results.statistic)
 
-        RealPVals = np.array([])
+        RealStat = np.array([])
         for x in range(0, leftDomain.shape[0]):
             ttest_results = scipy.stats.ttest_ind(
                 TP53NotExp[:, x], TP53WildtypeExp[:, x])
-            RealPVals = np.append(RealPVals, ttest_results.statistic)
+            RealStat = np.append(RealStat, ttest_results.statistic)
 
-        SyntheticNotPVals = np.array([])
+        SyntheticNotStat = np.array([])
         for x in range(0, leftDomain.shape[0]):
             ttest_results = scipy.stats.ttest_ind(
                 TP53NotExp[:, x], TP53NotInducedToExp[:, x])
-            SyntheticNotPVals = np.append(
-                SyntheticNotPVals, ttest_results.statistic)
+            SyntheticNotStat = np.append(
+                SyntheticNotStat, ttest_results.statistic)
 
         plt.figure()
         plt.title("Scatter Plot of the t-test difference between real TP53"
-                  + " wildtype vs. real TP53 mutated and real vs. synthetic"
-                  + " TP53 data")
-        plt.scatter(RealPVals, SyntheticPVals, c='r',
+                  " wildtype vs. real TP53 mutated and real vs. synthetic"
+                  " TP53 data")
+        plt.scatter(RealStat, SyntheticStat, c='r',
                     label="Real TP53 Wildtype vs. Synthetic TP53 Mutated")
-        plt.scatter(RealPVals, SyntheticNotPVals, c='b',
+        plt.scatter(RealStat, SyntheticNotStat, c='b',
                     label="Real TP53 Mutated vs. Synthetic TP53 Wildtype")
         plt.xlabel("T-test stat of real TP53 Wildtype vs. real mutated")
         plt.ylabel("T-test stat of real and synthetic data")
-        plt.legend()
+        lgd = plt.legend(ncol=1,
+                         bbox_to_anchor=(1.03, 1),
+                         loc=2,
+                         borderaxespad=0.,
+                         fontsize=10)
         plt.savefig(os.path.join('Output', params.dataSetInfo.name,
                                  'Scatter_{}.png'.
-                                 format(str(params.outputNum))))
+                                 format(str(params.outputNum))),
+                    bbox_extra_artists=(lgd,),
+                    bbox_inches='tight')
 
         TP53WildtypeLatent = modelHandle.rightEncoder.predict(TP53Wildtype)
         TP53NotLatent = modelHandle.rightEncoder.predict(TP53Not)
@@ -236,13 +245,15 @@ class dataInfo(dataSetInfoAbstract):
 
         plt.figure()
         plt.bar(np.arange(LantentSpacePerc.shape[0]), LantentSpacePerc)
-        plt.title("Percentage difference between TP53 Wildtype and"
-                  + " mutated for each latent space node, Mutation")
+        title = plt.title("Percentage difference between TP53 Wildtype and"
+                          " mutated for each latent space node, Mutation")
         plt.xticks(np.arange(LantentSpacePerc.shape[0]), np.arange(
             LantentSpacePerc.shape[0]))
         plt.savefig(os.path.join('Output', params.dataSetInfo.name,
                                  'TP53MutLatentSpaceComparrison_{}.png'.
-                                 format(str(params.outputNum))))
+                                 format(str(params.outputNum))),
+                    bbox_extra_artists=(title,),
+                    bbox_inches='tight')
 
         maxInd = np.argmax(LantentSpacePerc)
         print TP53WildtypeLatent.mean(axis=0)[maxInd]
@@ -258,13 +269,15 @@ class dataInfo(dataSetInfoAbstract):
 
         plt.figure()
         plt.bar(np.arange(LantentSpacePerc.shape[0]), LantentSpacePerc)
-        plt.title("Percentage difference between TP53 Wildtype and"
-                  + " mutated for each latent space node, Expression")
+        title = plt.title("Percentage difference between TP53 Wildtype and"
+                          " mutated for each latent space node, Expression")
         plt.xticks(np.arange(LantentSpacePerc.shape[0]), np.arange(
             LantentSpacePerc.shape[0]))
         plt.savefig(os.path.join('Output', params.dataSetInfo.name,
                                  'TP53ExpLatentSpaceComparrison_{}.png'.
-                                 format(str(params.outputNum))))
+                                 format(str(params.outputNum))),
+                    bbox_extra_artists=(title,),
+                    bbox_inches='tight')
 
         file = os.path.join('Data', 'Cognoma_Data', 'Training',
                             'cancerLabels.csv')
@@ -278,7 +291,7 @@ class dataInfo(dataSetInfoAbstract):
         umap_results = umap.fit_transform(leftPredicted[randIndexes, :])
 
         plt.figure()
-        plt.title(params.dataSetInfo.leftDomainName + " Latent Space")
+        title = plt.title(params.dataSetInfo.leftDomainName + " Latent Space")
 
         for g in np.unique(labels[randIndexes]):
             i = np.where(labels[randIndexes] == g)
@@ -286,7 +299,9 @@ class dataInfo(dataSetInfoAbstract):
         plt.legend()
         plt.savefig(os.path.join('Output', 'Cognoma',
                                  'LeftUMap_{}.png'.
-                                 format(str(params.outputNum))))
+                                 format(str(params.outputNum))),
+                    bbox_extra_artists=(title,),
+                    bbox_inches='tight')
 
         umap = up.UMAP(n_neighbors=5,
                        min_dist=0.1,
@@ -295,14 +310,16 @@ class dataInfo(dataSetInfoAbstract):
         umap_results = umap.fit_transform(rightPredicted[randIndexes, :])
 
         plt.figure()
-        plt.title(params.dataSetInfo.rightDomainName + " Latent Space")
+        title = plt.title(params.dataSetInfo.rightDomainName + " Latent Space")
         for g in np.unique(labels[randIndexes]):
             i = np.where(labels[randIndexes] == g)
             plt.scatter(umap_results[i, 0], umap_results[i, 1], label=g)
         plt.legend()
         plt.savefig(os.path.join('Output', 'Cognoma',
                                  'RightUMap_{}.png'.
-                                 format(str(params.outputNum))))
+                                 format(str(params.outputNum))),
+                    bbox_extra_artists=(title,),
+                    bbox_inches='tight')
 
         rightDomainFloat = rightDomain.astype('float64')
 
@@ -419,14 +436,17 @@ class dataInfo(dataSetInfoAbstract):
                            col_colors=label_colors,
                            xticklabels=False, yticklabels=False)
         # To re-enable colorbar, comment-out the following line
-        g.fig.suptitle('Right Domain (Mutated), Original (Blue),'
-                       ' Reconstructed (Green), and Translated (Purple)'
-                       ' Clustermap.')
+        title = g.fig.suptitle('Right Domain (Mutated), Original (Blue),'
+                               ' Reconstructed (Green),'
+                               'and Translated (Purple)'
+                               ' Clustermap.')
         g.cax.set_visible(False)
 
         plt.savefig(os.path.join('Output', 'Cognoma',
                                  'RightHeatmap_{}.png'.
-                                 format(str(params.outputNum))))
+                                 format(str(params.outputNum))),
+                    bbox_extra_artists=(title,),
+                    bbox_inches='tight')
 
         # For the Left Domain
         random = np.random.randint(0, num_examples,
@@ -470,13 +490,16 @@ class dataInfo(dataSetInfoAbstract):
                            xticklabels=False, yticklabels=False)
         # To re-enable colorbar, comment-out the following line
         g.cax.set_visible(False)
-        g.fig.suptitle('Left Domain (Expression), Original (Blue),'
-                       ' Reconstructed (Green), and Translated (Purple)'
-                       ' Clustermap')
+        title = g.fig.suptitle('Left Domain (Expression), Original (Blue),'
+                               ' Reconstructed (Green),'
+                               ' and Translated (Purple)'
+                               ' Clustermap')
 
         plt.savefig(os.path.join('Output', 'Cognoma',
                                  'LeftHeatmap_{}.png'.
-                                 format(str(params.outputNum))))
+                                 format(str(params.outputNum))),
+                    bbox_extra_artists=(title,),
+                    bbox_inches='tight')
 
         # plt.show()
         return
