@@ -92,7 +92,6 @@ if not os.path.exists(os.path.join('Output', dataSetInfo.name)):
     os.mkdir(os.path.join('Output', dataSetInfo.name))
 
 
-
 model_parameters = model_parameters(
     batchSize=args.batchSize, numEpochs=args.numEpochs,
     inputSizeLeft=x_train.shape[1],
@@ -107,7 +106,9 @@ model_parameters = model_parameters(
     notes=args.notes,
     dataSetInfo=dataSetInfo)
 
-while os.path.exists(os.path.join('Output', dataSetInfo.name, "{}.html".format(model_parameters.outputNum))):
+while os.path.exists(os.path.join('Output', dataSetInfo.name,
+                                  "{}.html".format(model_parameters.outputNum)
+                                  )):
     model_parameters.outputNum += 1
 
 # Create the model with the parameters

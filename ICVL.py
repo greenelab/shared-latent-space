@@ -61,7 +61,7 @@ class dataInfo(dataSetInfoAbstract):
 
         np.random.shuffle(x_temp)
         np.random.shuffle(a_temp)
-        
+
         length = x_temp.shape[0]
 
         x_train = x_temp[:int(length * .9)]
@@ -103,7 +103,8 @@ class dataInfo(dataSetInfoAbstract):
             plt.plot(linesStart, linesEnd, c)
 
     def visualize(self, modelHandle,
-                  leftPredicted, rightPredicted, rightDomain, right_decoded_imgs,
+                  leftPredicted, rightPredicted, rightDomain,
+                  right_decoded_imgs,
                   rightToLeftCycle,
                   right_generatedImgs, leftToRightImgs,
                   leftDomain, left_decoded_imgs, leftToRightCycle,
