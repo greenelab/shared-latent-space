@@ -1,23 +1,30 @@
 """
 shared-latent-space/main_file.py
 
-This file is the main file which should be run from command line
+This file is the main file which should be run from command line. Please note
+that currently two of the command line arugments are not used, but I have left
+them so that the model can be easily changed.
 
-Usage: Run in comand line with no arguments:
+Usage: Run in comand line with arguments:
 
-        python main_file.py
+        python main_file.py --data Cognoma --batchSize 60 --numEpochs 60
+        --firstLayerSizeLeft 1024 --thirdLayerSize 0 --secondLayerSize 0
+        --encodedSize 32 --firstLayerSizeRight 1024 --kappa .1 --noise 0.2
+        --notes "example note"
 
 Output:
-    Represenation of the model's encoder saved to /Output/<dataset>
-        with the parameters of the model in the file name.
+    Represenation of the model's encoders saved to /Output/<dataset>
+        with the number of the run in the name, so then every run is saved.
+    The model parameters are saves to a file which uses the model run as its
+        name, so that the parameters are linked to the number of the run
     Visualiazations as defined in <dataset>'s corresponding implementation
         of DataSetInfoAbstractClass. These may also be saved to the
-        /Output/<dataset> foled depending on the implementation.
+        /Output/<dataset> folder depending on the implementation.
 
-Currently, <dataset> can be ICVL or MNIST as included with this repo.
+Currently, <dataset> can be ICVL, MNIST, or Cognoma as included with this repo.
 
 Author: Chris Williams
-Date: 5/22/18
+Date: 6/25/18
 """
 
 
@@ -65,6 +72,7 @@ def get_args():
 
 
 args = get_args()
+
 # Dictionary of generator types. The string is the command line argument     !!
 data_dict = {
         'MNIST': MNIST.dataInfo(),
@@ -106,6 +114,7 @@ model_parameters = model_parameters(
     notes=args.notes,
     dataSetInfo=dataSetInfo)
 
+# Calculate which number run it is, so then the output will have a unique name
 while os.path.exists(os.path.join('Output', dataSetInfo.name,
                                   "{}.html".format(model_parameters.outputNum)
                                   )):

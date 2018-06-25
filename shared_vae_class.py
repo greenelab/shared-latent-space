@@ -4,19 +4,16 @@ shared-latent-space/shared_vae_class.py
 This class contains the model and the associated functions.
 it is called by main_file.py. It uses many models to represent
 the various parts of the shared latent space VAE and allow for
-the training of certain parts in isolation. To train, it trains
-the model as a whole for n epochs, then switches between training
-only the shared part of the model, the left part, and the right
-parts individually for n epochs. This is achieved by freezing the
-weights. In the generate() function, the class calls upon the
+the training of certain parts in isolation. To train, it switches
+between training the left part, and the right parts individually for n epochs.
+In the generate() function, the class calls upon the
 specific implementation of DataSetInfoAbstractClass for the
 given dataset.
 
 
 Author: Chris Williams
-Date: 5/22/18
+Date: 6/25/18
 """
-
 
 import os
 
@@ -47,6 +44,7 @@ import MNIST
 
 from model_objects import model_parameters, model
 
+# Set the seed
 seed(0)
 set_random_seed(0)
 
@@ -63,6 +61,8 @@ class shared_vae_class(object):
         Returns: None
         """
         self.params = model_parameters
+
+        # Variables for warm start
         self.betaRight = K.variable(1)
         self.betaLeft = K.variable(1)
         self.kappa = self.params.kappa
@@ -87,7 +87,7 @@ class shared_vae_class(object):
         # Loss function comprised of two parts, Cross_entropy, and
         # divergence
         def left_vae_loss(inputs, finalLayer):
-            # Other options for loss function
+            # Other options for loss function:
             # reconstruction_loss = self.params.inputSizeLeft *
             #                       binary_crossentropy(finalLayer, inputs)
             # reconstruction_loss = self.params.inputSizeLeft *
@@ -103,7 +103,7 @@ class shared_vae_class(object):
         # Loss function comprised of two parts, Cross_entropy, and
         # divergence
         def right_vae_loss(inputs, finalLayer):
-            # Other options for loss function
+            # Other options for loss function:
             # reconstruction_loss = self.params.inputSizeRight *
             #                       binary_crossentropy(finalLayer, inputs)
             # reconstruction_loss = self.params.inputSizeRight *
@@ -235,6 +235,7 @@ class shared_vae_class(object):
         self.rightToLeftModel = Model(rightEncoderInput, outputs)
         # rightToLeftModel.summary()
 
+        # Define custom learn rate
         adam = Adam(lr=.001)
 
         outputs = self.leftDecoder(self.leftEncoder(leftEncoderInput))
@@ -267,6 +268,8 @@ class shared_vae_class(object):
         Args:
             leftDomain (array of floats): Left input.
             rightDomain (array of floats): Right input.
+            leftDomainVal (array of floats): Left validation input.
+            leftDomain (array of floats): Right validation input.
             denoising (float): Amount of noise to add before trainning.
 
         Returns: None
@@ -289,6 +292,7 @@ class shared_vae_class(object):
             leftDomain_noisy = leftDomain
             rightDomain_noisy = rightDomain
 
+        # Set up arrays to hold the loss over training.
         left_vae_loss_data = []
         left_vae_val_loss_data = []
         left_callback = custom_callback(
@@ -299,6 +303,7 @@ class shared_vae_class(object):
         right_callback = custom_callback(
             right_vae_loss_data, right_vae_val_loss_data)
 
+        # Train the model for n epochs
         for i in range(self.params.numEpochs):
             print("On EPOCH: " + repr(i + 1))
             self.rightModel.fit(rightDomain_noisy, rightDomain,
@@ -316,9 +321,11 @@ class shared_vae_class(object):
                                callbacks=[left_callback,
                                           WarmUpCallback(self.betaLeft,
                                                          self.kappa)])
+            # Early stop if nan loss
             if np.isnan(right_vae_loss_data[-1]):
                 i = self.params.numEpochs
 
+        # Make graph of the training and validation loss
         sns.set_style("darkgrid")
         fig, ax = plt.subplots()
 
@@ -480,7 +487,7 @@ class shared_vae_class(object):
 
 
 class custom_callback(Callback):
-
+    # For logging the loss throughout training
     def __init__(self, loss_data, val_loss):
         self.loss_data = loss_data
         self.val_loss = val_loss
@@ -496,7 +503,7 @@ class WarmUpCallback(Callback):
         self.beta = beta
         self.kappa = kappa
 
-    # Behavior on each epoch
+    # Behavior on each epoch, for warm start
     def on_epoch_end(self, epoch, logs={}):
         if K.get_value(self.beta) < 1:
             K.set_value(self.beta, K.get_value(self.beta) + self.kappa)
