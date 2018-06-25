@@ -54,3 +54,20 @@ class model_parameters(object):
 
         self.dataSetInfo = dataSetInfo
         self.outputNum = 0
+
+
+class model(object):
+
+    def __init__(self, leftEncoder, rightEncoder,
+                 leftDecoder, rightDecoder,
+                 leftToRightModel, rightToLeftModel,
+                 leftModel, rightModel):
+
+        self.leftEncoder = leftEncoder
+        self.rightEncoder = rightEncoder
+        self.leftDecoder = leftDecoder
+        self.rightDecoder = rightDecoder
+        self.leftToRightModel = leftToRightModel
+        self.rightToLeftModel = rightToLeftModel
+        self.leftModel = leftModel
+        self.rightModel = rightModel

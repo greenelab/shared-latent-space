@@ -70,7 +70,7 @@ class dataInfo(dataSetInfoAbstract):
 
         np.random.shuffle(x_temp)
         np.random.shuffle(a_temp)
-        
+
         length = x_temp.shape[0]
 
         x_train = x_temp[:int(length * .9)]
@@ -80,8 +80,7 @@ class dataInfo(dataSetInfoAbstract):
         a_test = a_temp[int(length * .9):]
         return (x_train, a_train, x_test, a_test)
 
-    def visualize(self, leftEncoder, rightEncoder,
-                  leftToRightModel, rightToLeftModel,
+    def visualize(self, modelHandle,
                   leftPredicted, rightPredicted, rightDomain, right_decoded_imgs,
                   rightToLeftCycle,
                   right_generatedImgs, leftToRightImgs,
@@ -126,7 +125,8 @@ class dataInfo(dataSetInfoAbstract):
         for x in range(1, rightDomain.shape[0]):
             if rightDomain[x, 485] == 0:
                 TP53Wildtype = np.vstack((TP53Wildtype, rightDomain[x, :]))
-                TP53WildtypeExp = np.vstack((TP53WildtypeExp, leftDomain[x, :]))
+                TP53WildtypeExp = np.vstack(
+                    (TP53WildtypeExp, leftDomain[x, :]))
 
         TP53Not = np.array(rightDomain[0, :])
         TP53NotExp = np.array(leftDomain[0, :])
@@ -136,7 +136,8 @@ class dataInfo(dataSetInfoAbstract):
                 TP53Not = np.vstack((TP53Not, rightDomain[x, :]))
                 TP53NotExp = np.vstack((TP53NotExp, leftDomain[x, :]))
 
-        randIndexes = np.random.randint(0, min(TP53Wildtype.shape[0], TP53Not.shape[0])-1, (100,))
+        randIndexes = np.random.randint(
+            0, min(TP53Wildtype.shape[0], TP53Not.shape[0]) - 1, (100,))
         TP53Wildtype = TP53Wildtype[1:]
         TP53WildtypeExp = TP53WildtypeExp[1:]
         TP53Wildtype = TP53Wildtype[randIndexes]
@@ -147,10 +148,10 @@ class dataInfo(dataSetInfoAbstract):
         TP53Not = TP53Not[randIndexes]
         TP53NotExp = TP53NotExp[randIndexes]
 
-        (TP53WildTypeToExp, _) = rightToLeftModel.predict(TP53Wildtype)
+        (TP53WildTypeToExp, _) = modelHandle.rightToLeftModel.predict(TP53Wildtype)
 
-        TP53WildTypeToExpMSE = np.square(np.subtract(TP53WildtypeExp, TP53WildTypeToExp)).mean(axis=0)
-
+        TP53WildTypeToExpMSE = np.square(np.subtract(
+            TP53WildtypeExp, TP53WildTypeToExp)).mean(axis=0)
 
         import copy
 
@@ -159,12 +160,13 @@ class dataInfo(dataSetInfoAbstract):
 
         TP53Induced[:, 485] = 1
 
-        (TP53InducedToExp, _) = rightToLeftModel.predict(TP53Induced)
+        (TP53InducedToExp, _) = modelHandle.rightToLeftModel.predict(TP53Induced)
 
-        TP53InducedToExpMSE = np.square(np.subtract(TP53InducedExp, TP53InducedToExp)).mean(axis=0)
+        TP53InducedToExpMSE = np.square(np.subtract(
+            TP53InducedExp, TP53InducedToExp)).mean(axis=0)
 
-
-        ttest_results = scipy.stats.ttest_ind(TP53WildTypeToExpMSE, TP53InducedToExpMSE)
+        ttest_results = scipy.stats.ttest_ind(
+            TP53WildTypeToExpMSE, TP53InducedToExpMSE)
         t_stat = ttest_results.statistic
         p_val = ttest_results.pvalue
 
@@ -175,75 +177,100 @@ class dataInfo(dataSetInfoAbstract):
         table_labels = dict(values=['Stat', 'PVal'])
         table = [go.Table(cells=table_data, header=table_labels)]
 
-        py.offline.plot(table, filename = os.path.join('Output', params.dataSetInfo.name,
-                                                't_test_{}'.format(str(params.outputNum))))
+        py.offline.plot(table, filename=os.path.join('Output', params.dataSetInfo.name,
+                                                     't_test_{}'.format(str(params.outputNum))))
 
         TP53NotInduced = copy.copy(TP53Not)
         TP53NotInduced[:, 485] = 0
 
-        (TP53NotInducedToExp, _) = rightToLeftModel.predict(TP53NotInduced)
+        (TP53NotInducedToExp, _) = modelHandle.rightToLeftModel.predict(TP53NotInduced)
 
         SyntheticPVals = np.array([])
         for x in range(0, leftDomain.shape[0]):
-            ttest_results = scipy.stats.ttest_ind(TP53WildtypeExp[:, x], TP53InducedToExp[:, x])
+            ttest_results = scipy.stats.ttest_ind(
+                TP53WildtypeExp[:, x], TP53InducedToExp[:, x])
             SyntheticPVals = np.append(SyntheticPVals, ttest_results.statistic)
 
         RealPVals = np.array([])
         for x in range(0, leftDomain.shape[0]):
-            ttest_results = scipy.stats.ttest_ind(TP53NotExp[:, x], TP53WildtypeExp[:, x])
+            ttest_results = scipy.stats.ttest_ind(
+                TP53NotExp[:, x], TP53WildtypeExp[:, x])
             RealPVals = np.append(RealPVals, ttest_results.statistic)
 
         SyntheticNotPVals = np.array([])
         for x in range(0, leftDomain.shape[0]):
-            ttest_results = scipy.stats.ttest_ind(TP53NotExp[:, x], TP53NotInducedToExp[:, x])
-            SyntheticNotPVals = np.append(SyntheticNotPVals, ttest_results.statistic)
+            ttest_results = scipy.stats.ttest_ind(
+                TP53NotExp[:, x], TP53NotInducedToExp[:, x])
+            SyntheticNotPVals = np.append(
+                SyntheticNotPVals, ttest_results.statistic)
 
         plt.figure()
         plt.title("Scatter Plot of the t-test difference between real TP53 wildtype vs. real TP53 mutated and real vs. synthetic TP53 data")
-        plt.scatter(RealPVals, SyntheticPVals, c='r', label="Real TP53 Wildtype vs. Synthetic TP53 Mutated")
-        plt.scatter(RealPVals, SyntheticNotPVals, c='b', label="Real TP53 Mutated vs. Synthetic TP53 Wildtype")
+        plt.scatter(RealPVals, SyntheticPVals, c='r',
+                    label="Real TP53 Wildtype vs. Synthetic TP53 Mutated")
+        plt.scatter(RealPVals, SyntheticNotPVals, c='b',
+                    label="Real TP53 Mutated vs. Synthetic TP53 Wildtype")
         plt.xlabel("T-test stat of real TP53 Wildtype vs. real mutated")
         plt.ylabel("T-test stat of real and synthetic data")
-        #plt.yscale('log')
-        #plt.xscale('log')
+        # plt.yscale('log')
+        # plt.xscale('log')
         plt.legend()
         plt.savefig(os.path.join('Output', params.dataSetInfo.name,
                                  'Scatter_{}.png'.
                                  format(str(params.outputNum))))
 
+        TP53WildtypeLatent = modelHandle.rightEncoder.predict(TP53Wildtype)
+        TP53NotLatent = modelHandle.rightEncoder.predict(TP53Not)
 
-        TP53WildtypeLatent = rightEncoder.predict(TP53Wildtype)
-        TP53NotLatent = rightEncoder.predict(TP53Not)
-
-        LantentSpacePerc = (TP53WildtypeLatent - TP53NotLatent)/ TP53NotLatent
+        LantentSpacePerc = (TP53WildtypeLatent - TP53NotLatent) / TP53NotLatent
 
         LantentSpacePerc = LantentSpacePerc.mean(axis=0)
 
-        plt.bar(np.arange(LantentSpacePerc.shape[0]),LantentSpacePerc)
-        plt.title("Percentage difference between TP53 Wildtype and mutated for each latent space node")
-        plt.xticks(np.arange(LantentSpacePerc.shape[0]), np.arange(LantentSpacePerc.shape[0]))
-        plt.savefig(os.path.join('TP53LatentSpaceComparrison', params.dataSetInfo.name,
-                                 'Scatter_{}.png'.
+        plt.figure()
+        plt.bar(np.arange(LantentSpacePerc.shape[0]), LantentSpacePerc)
+        plt.title(
+            "Percentage difference between TP53 Wildtype and mutated for each latent space node, Mutation")
+        plt.xticks(np.arange(LantentSpacePerc.shape[0]), np.arange(
+            LantentSpacePerc.shape[0]))
+        plt.savefig(os.path.join('Output', params.dataSetInfo.name,
+                                 'TP53MutLatentSpaceComparrison_{}.png'.
                                  format(str(params.outputNum))))
-        plt.show()
+        # plt.show()
 
         maxInd = np.argmax(LantentSpacePerc)
         print TP53WildtypeLatent.mean(axis=0)[maxInd]
         print TP53NotLatent.mean(axis=0)[maxInd]
 
+        TP53WildtypeExpLatent = modelHandle.leftEncoder.predict(TP53WildtypeExp)
+        TP53NotExpLatent = modelHandle.leftEncoder.predict(TP53NotExp)
+
+        LantentSpacePerc = (TP53WildtypeExpLatent - TP53NotExpLatent) / TP53NotExpLatent
+
+        LantentSpacePerc = LantentSpacePerc.mean(axis=0)
+
+        plt.figure()
+        plt.bar(np.arange(LantentSpacePerc.shape[0]), LantentSpacePerc)
+        plt.title(
+            "Percentage difference between TP53 Wildtype and mutated for each latent space node, Expression")
+        plt.xticks(np.arange(LantentSpacePerc.shape[0]), np.arange(
+            LantentSpacePerc.shape[0]))
+        plt.savefig(os.path.join('Output', params.dataSetInfo.name,
+                                 'TP53ExpLatentSpaceComparrison_{}.png'.
+                                 format(str(params.outputNum))))
+        # plt.show()
+
         import cPickle
         file = os.path.join('Data', 'Cognoma_Data', 'Training',
-                    'cancerLabels.csv')
+                            'cancerLabels.csv')
         with open(file, "rb") as fp:
             labels = cPickle.load(fp)
-
 
         import umap as up
         n_sne = n
 
         umap = up.UMAP(n_neighbors=5,
-                      min_dist=0.1,
-                      metric='correlation')
+                       min_dist=0.1,
+                       metric='correlation')
         randIndexes = np.random.randint(0, leftDomain.shape[0], (n_sne,))
         umap_results = umap.fit_transform(leftPredicted[randIndexes, :])
 
@@ -259,8 +286,8 @@ class dataInfo(dataSetInfoAbstract):
                                  format(str(params.outputNum))))
 
         umap = up.UMAP(n_neighbors=5,
-                      min_dist=0.1,
-                      metric='correlation')
+                       min_dist=0.1,
+                       metric='correlation')
         randIndexes = np.random.randint(0, rightDomain.shape[0], (n_sne,))
         umap_results = umap.fit_transform(rightPredicted[randIndexes, :])
 
@@ -271,9 +298,8 @@ class dataInfo(dataSetInfoAbstract):
             plt.scatter(umap_results[i, 0], umap_results[i, 1], label=g)
         plt.legend()
         plt.savefig(os.path.join('Output', 'Cognoma',
-                                 'LeftUMap_{}.png'.
+                                 'RightUMap_{}.png'.
                                  format(str(params.outputNum))))
-
 
         rightDomainFloat = rightDomain.astype('float64')
 
@@ -333,7 +359,7 @@ class dataInfo(dataSetInfoAbstract):
 
             # display depth generated
             ax = plt.subplot(6, 10, i + 1 + 5 * 10)
-            plt.imshow(right_decoded_imgs[randIndexes[i]]
+            plt.imshow(leftToRightImgs[randIndexes[i]]
                        .reshape(self.rightXDim,
                                 self.rightYDim))
             ax.get_xaxis().set_visible(False)
@@ -390,8 +416,8 @@ class dataInfo(dataSetInfoAbstract):
                            col_colors=label_colors,
                            xticklabels=False, yticklabels=False)
         # To re-enable colorbar, comment-out the following line
-        g.fig.suptitle('Right Domain (Mutated), Original (Green),'
-                       ' Reconstructed (Blue), and Translated (Purple)'
+        g.fig.suptitle('Right Domain (Mutated), Original (Blue),'
+                       ' Reconstructed (Green), and Translated (Purple)'
                        ' Clustermap.')
         g.cax.set_visible(False)
 
@@ -441,12 +467,12 @@ class dataInfo(dataSetInfoAbstract):
                            xticklabels=False, yticklabels=False)
         # To re-enable colorbar, comment-out the following line
         g.cax.set_visible(False)
-        g.fig.suptitle('Left Domain (Expression), Original (Green),'
-                       ' Reconstructed (Blue), and Translated (Purple)'
+        g.fig.suptitle('Left Domain (Expression), Original (Blue),'
+                       ' Reconstructed (Green), and Translated (Purple)'
                        ' Clustermap')
 
         plt.savefig(os.path.join('Output', 'Cognoma',
                                  'LeftHeatmap_{}.png'.
                                  format(str(params.outputNum))))
-        #plt.show()
+        # plt.show()
         return

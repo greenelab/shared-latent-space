@@ -66,8 +66,7 @@ class dataInfo(dataSetInfoAbstract):
             (x_test, a_test) = cPickle.load(fp)
         return (x_train, a_train, x_test, a_test)
 
-    def visualize(self, leftEncoder, rightEncoder,
-                  leftToRightModel, rightToLeftModel,
+    def visualize(self, modelHandle,
                   leftPredicted, rightPredicted, rightDomain, right_decoded_imgs,
                   rightToLeftCycle, right_generatedImgs, leftToRightImgs,
                   leftDomain, left_decoded_imgs, leftToRightCycle,

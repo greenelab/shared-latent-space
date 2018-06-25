@@ -31,8 +31,7 @@ class dataSetInfoAbstract(object):
         return
 
     @abstractmethod
-    def visualize(self, leftEncoder, rightEncoder,
-                  leftToRightModel, rightToLeftModel,
+    def visualize(self, modelHandle,
                   leftPredicted, rightPredicted, rightDomain, right_decoded_imgs,
                   rightToLeftCycle, right_generatedImgs, leftToRightImgs,
                   leftDomain, left_decoded_imgs, leftToRightCycle,

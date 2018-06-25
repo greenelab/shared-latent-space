@@ -17,9 +17,9 @@ Author: Chris Williams
 Date: 5/22/18
 """
 from numpy.random import seed
-seed(200)
+seed(0)
 from tensorflow import set_random_seed
-set_random_seed(200)
+set_random_seed(0)
 
 import os
 
@@ -44,10 +44,7 @@ from keras.losses import binary_crossentropy, mse
 import ICVL
 import MNIST
 
-from model_objects import model_parameters
-
-
-
+from model_objects import model_parameters, model
 
 
 class shared_vae_class(object):
@@ -198,8 +195,8 @@ class shared_vae_class(object):
         # Three different Decoders
         self.fullDecoder = Model(
             decoderInputs, [leftDecoderOutput, rightDecoderOutput])
-        leftDecoder = Model(decoderInputs, leftDecoderOutput)
-        rightDecoder = Model(decoderInputs, rightDecoderOutput)
+        self.leftDecoder = Model(decoderInputs, leftDecoderOutput)
+        self.rightDecoder = Model(decoderInputs, rightDecoderOutput)
         # decoder.summary()
 
         # Left to Right transition
@@ -212,9 +209,9 @@ class shared_vae_class(object):
         self.rightToLeftModel = Model(rightEncoderInput, outputs)
         # rightToLeftModel.summary()
 
-        adam = Adam(lr=.00008)
+        adam = Adam(lr=.001)
 
-        outputs = leftDecoder(self.leftEncoder(leftEncoderInput))
+        outputs = self.leftDecoder(self.leftEncoder(leftEncoderInput))
         self.leftModel = Model(leftEncoderInput, outputs)
         self.leftModel.compile(
             optimizer=adam, loss=left_vae_loss)
@@ -223,9 +220,9 @@ class shared_vae_class(object):
                                         str(self.params.dataSetInfo.name),
                                         'sharedVaeLeftEncoder_{}.png'
                                         .format(str(self.params.outputNum))),
-                    show_shapes=True)
+                   show_shapes=True)
 
-        outputs = rightDecoder(self.rightEncoder(rightEncoderInput))
+        outputs = self.rightDecoder(self.rightEncoder(rightEncoderInput))
         self.rightModel = Model(rightEncoderInput, outputs)
         self.rightModel.compile(
             optimizer=adam, loss=right_vae_loss)
@@ -234,7 +231,7 @@ class shared_vae_class(object):
                                         str(self.params.dataSetInfo.name),
                                         'sharedVaeRightEncoder_{}.png'
                                         .format(str(self.params.outputNum))),
-                    show_shapes=True)
+                   show_shapes=True)
 
     def train_model(self, leftDomain, rightDomain, leftDomainVal, rightDomainVal, denoising):
         """
@@ -267,18 +264,21 @@ class shared_vae_class(object):
 
         left_vae_loss_data = []
         left_vae_val_loss_data = []
-        left_callback = custom_callback(left_vae_loss_data, left_vae_val_loss_data)
+        left_callback = custom_callback(
+            left_vae_loss_data, left_vae_val_loss_data)
 
         right_vae_loss_data = []
         right_vae_val_loss_data = []
-        right_callback = custom_callback(right_vae_loss_data, right_vae_val_loss_data)
+        right_callback = custom_callback(
+            right_vae_loss_data, right_vae_val_loss_data)
 
         for i in range(self.params.numEpochs):
             print("On EPOCH: " + repr(i + 1))
             self.rightModel.fit(rightDomain_noisy, rightDomain,
                                 epochs=1,
                                 batch_size=self.params.batchSize,
-                                validation_data=(rightDomainVal, rightDomainVal),
+                                validation_data=(
+                                    rightDomainVal, rightDomainVal),
                                 callbacks=[right_callback,
                                            WarmUpCallback(self.betaRight,
                                                           self.kappa)])
@@ -314,22 +314,22 @@ class shared_vae_class(object):
                                  'Loss_{}.png'.
                                  format(str(self.params.outputNum))))
 
-
         table_data = dict(values=[[str(self.params.numEpochs)], [str(self.params.firstLayerSizeLeft)], [str(self.params.inputSizeLeft)],
-                       #[str(self.params.secondLayerSize)],
-                       #[str(self.params.thirdLayerSize)],
-                       [str(self.params.encodedSize)],
-                       [str(self.params.firstLayerSizeRight)], [str(self.params.inputSizeRight)], [str(self.params.kappa)],
-                       [str(self.params.noise)], [self.params.notes]])
-        table_labels = dict(values=['Epochs', 'First Layer Left', 'Input Size Left', 
-                        #'Second Layer',
-                        #'Third Layer',
-                        'Encoded Size',
-                        'First Layer Right', 'inputSizeRight', 'Kappa', 'Noise level', 'notes'])
+                                  #[str(self.params.secondLayerSize)],
+                                  #[str(self.params.thirdLayerSize)],
+                                  [str(self.params.encodedSize)],
+                                  [str(self.params.firstLayerSizeRight)], [
+            str(self.params.inputSizeRight)], [str(self.params.kappa)],
+            [str(self.params.noise)], [self.params.notes]])
+        table_labels = dict(values=['Epochs', 'First Layer Left', 'Input Size Left',
+                                    #'Second Layer',
+                                    #'Third Layer',
+                                    'Encoded Size',
+                                    'First Layer Right', 'inputSizeRight', 'Kappa', 'Noise level', 'notes'])
         table = [go.Table(cells=table_data, header=table_labels)]
 
-        py.offline.plot(table, filename = os.path.join('Output', self.params.dataSetInfo.name,
-                                                '{}'.format(str(self.params.outputNum))))
+        py.offline.plot(table, filename=os.path.join('Output', self.params.dataSetInfo.name,
+                                                     '{}'.format(str(self.params.outputNum))))
 
     def generate(self, leftDomain, rightDomain):
         """
@@ -345,9 +345,9 @@ class shared_vae_class(object):
 
         # Create generated data
         leftPredicted = self.leftEncoder.predict(leftDomain,
-                                             batch_size=self.params.batchSize)
+                                                 batch_size=self.params.batchSize)
         rightPredicted = self.rightEncoder.predict(rightDomain,
-                                              batch_size=self.params.batchSize)
+                                                   batch_size=self.params.batchSize)
 
         predicted = np.append(leftPredicted, rightPredicted)
 
@@ -373,10 +373,17 @@ class shared_vae_class(object):
         (leftToRightCycle, _) = self.rightToLeftModel.predict(leftToRightImgs)
         (_, rightToLeftCycle) = self.leftToRightModel.predict(rightToLeftImgs)
 
+        modelHandle = model(self.leftEncoder,
+                            self.rightEncoder,
+                            self.leftDecoder,
+                            self.rightDecoder,
+                            self.leftToRightModel,
+                            self.rightToLeftModel,
+                            self.leftModel,
+                            self.rightModel)
 
         # Visualize the Data if Applicable
-        self.params.dataSetInfo.visualize(self.leftEncoder, self.rightEncoder,
-                                          self.leftToRightModel, self.rightToLeftModel,
+        self.params.dataSetInfo.visualize(modelHandle,
                                           leftPredicted, rightPredicted,
                                           rightDomain,
                                           right_decoded_imgs, rightToLeftCycle,
@@ -442,6 +449,7 @@ class custom_callback(Callback):
 
 
 class WarmUpCallback(Callback):
+
     def __init__(self, beta, kappa):
         self.beta = beta
         self.kappa = kappa

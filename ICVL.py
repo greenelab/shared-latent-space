@@ -102,8 +102,7 @@ class dataInfo(dataSetInfoAbstract):
             linesEnd = np.array([Ys[i], Ys[j]])
             plt.plot(linesStart, linesEnd, c)
 
-    def visualize(self, leftEncoder, rightEncoder,
-                  leftToRightModel, rightToLeftModel,
+    def visualize(self, modelHandle,
                   leftPredicted, rightPredicted, rightDomain, right_decoded_imgs,
                   rightToLeftCycle,
                   right_generatedImgs, leftToRightImgs,
