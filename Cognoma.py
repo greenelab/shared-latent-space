@@ -211,12 +211,17 @@ class dataInfo(dataSetInfoAbstract):
         (TP53NotInducedToExp, _) = modelHandle.rightToLeftModel.predict(
                                                                 TP53NotInduced)
 
+        # Create y points for the linear regressions
+        xPoints = np.repeat(0, n)
+        xPoints = np.append(xPoints, np.repeat(1, n))
+
         # Perform t-tests for all four situations of real and synthetic data
         SyntheticEffect = np.array([])
         SyntheticPVal = np.array([])
         for x in range(0, leftDomain.shape[1]):
             regressResults = scipy.stats.linregress(
-                TP53WildtypeExp[:, x], TP53InducedToExp[:, x])
+                  xPoints,
+                  np.append(TP53WildtypeExp[:, x], TP53InducedToExp[:, x]))
             SyntheticEffect = np.append(SyntheticEffect, regressResults.slope)
             SyntheticPVal = np.append(SyntheticPVal, regressResults.pvalue)
 
@@ -224,17 +229,19 @@ class dataInfo(dataSetInfoAbstract):
         RealPVal = np.array([])
         for x in range(0, leftDomain.shape[1]):
             regressResults = scipy.stats.linregress(
-                TP53NotExp[:, x], TP53WildtypeExp[:, x])
-            RealEffect = np.append(RealEffect, regressResults.statistic)
+                  xPoints,
+                  np.append(TP53NotExp[:, x], TP53WildtypeExp[:, x]))
+            RealEffect = np.append(RealEffect, regressResults.slope)
             RealPVal = np.append(RealPVal, regressResults.pvalue)
 
         SyntheticNotEffect = np.array([])
         SyntheticNotPVal = np.array([])
         for x in range(0, leftDomain.shape[1]):
             regressResults = scipy.stats.linregress(
-                TP53NotExp[:, x], TP53NotInducedToExp[:, x])
+                  xPoints,
+                  np.append(TP53NotExp[:, x], TP53NotInducedToExp[:, x]))
             SyntheticNotEffect = np.append(
-                SyntheticNotEffect, regressResults.statistic)
+                SyntheticNotEffect, regressResults.slope)
             SyntheticNotPVal = np.append(
                 SyntheticNotPVal, regressResults.pvalue)
 
@@ -242,13 +249,15 @@ class dataInfo(dataSetInfoAbstract):
         AllSyntheticPVal = np.array([])
         for x in range(0, leftDomain.shape[1]):
             regressResults = scipy.stats.linregress(
-                TP53InducedToExp[:, x], TP53NotInducedToExp[:, x])
+                  xPoints,
+                  np.append(TP53InducedToExp[:, x], TP53NotInducedToExp[:, x]))
             AllSyntheticEffect = np.append(
-                AllSyntheticEffect, regressResults.statistic)
+                AllSyntheticEffect, regressResults.slope)
             AllSyntheticPVal = np.append(
                 AllSyntheticPVal, regressResults.pvalue)
 
-        # Make a scatter plot of the difference between three of the t-tests
+        # Make a scatter plot of the difference between three of the different
+        # expression
         # Shows the differnece between the transformed domains and the actual
         # difference in the real data.
         plt.figure()
@@ -260,7 +269,7 @@ class dataInfo(dataSetInfoAbstract):
         plt.scatter(RealEffect, SyntheticNotEffect, c='b', alpha=0.03,
                     label="Real TP53 Mutated vs. Synthetic TP53 Wildtype")
         plt.xlabel("Effect of real TP53 Wildtype vs. real mutated")
-        plt.ylabel("PVal of real and synthetic data")
+        plt.ylabel("Effect of real and synthetic data")
         lgd = plt.legend(ncol=1,
                          bbox_to_anchor=(1.03, 1),
                          loc=2,
@@ -324,8 +333,8 @@ class dataInfo(dataSetInfoAbstract):
         # Create volcano plots for all four of the differential regressions
 
         plt.figure()
-        plt.title("Volcano Plot of the differentially expressed genes and"
-                  " effect between real TP53"
+        plt.title("Volcano Plot of the effect and PVal between"
+                  " between real TP53"
                   " wildtype vs. real TP53 mutated")
         plt.scatter(RealEffect, -np.log10(RealPVal), c='r', alpha=0.03)
         plt.xlabel("Effect size of real TP53 Wildtype vs. real mutated")
@@ -334,76 +343,43 @@ class dataInfo(dataSetInfoAbstract):
                                  'VolcanoReal_{}.png'.
                                  format(str(params.outputNum))),
                     bbox_inches='tight')
-        '''
-        synthEffectSize = np.divide(np.square(SyntheticStat),
-                                    np.add(np.square(SyntheticStat), dF))
+
         plt.figure()
-        plt.title("Volcano Plot of the t-test between real TP53"
+        plt.title("Volcano Plot of the effect and PVal between real TP53"
                   " wildtype vs. synthetic TP53 mutated")
-        plt.scatter(SyntheticStat, synthEffectSize, c='r', alpha=0.03,
-                    label=("T-test r^2 effect size of real TP53 Wildtype vs."
-                           " synthetic mutated"))
-        plt.scatter(SyntheticStat, SyntheticPVal, c='b', alpha=0.03,
-                    label="T-test PVal of real TP53 Wildtype vs. synthetic mutated")
-        plt.xlabel("T-test stat of real TP53 Wildtype vs. synthetic mutated")
-        plt.ylabel("r^2 Effect size and PVal")
-        lgd = plt.legend(ncol=1,
-                         bbox_to_anchor=(1.03, 1),
-                         loc=2,
-                         borderaxespad=0.,
-                         fontsize=10)
+        plt.scatter(SyntheticEffect, -np.log10(SyntheticPVal), c='r',
+                    alpha=0.03)
+        plt.xlabel("Effect size of real TP53 Wildtype vs. synthetic mutated")
+        plt.ylabel("Negative log 10 PVal")
         plt.savefig(os.path.join('Output', params.dataSetInfo.name,
                                  'VolcanoSynth_{}.png'.
                                  format(str(params.outputNum))),
-                    bbox_extra_artists=(lgd,),
                     bbox_inches='tight')
 
-        synthNotEffectSize = np.divide(np.square(SyntheticNotStat),
-                                       np.add(np.square(SyntheticNotStat), dF))
         plt.figure()
-        plt.title("Volcano Plot of the t-test between synthetic TP53"
+        plt.title("Volcano Plot of the effect and PVal between synthetic TP53"
                   " wildtype vs. real TP53 mutated")
-        plt.scatter(SyntheticNotStat, synthNotEffectSize, c='r', alpha=0.03,
-                    label=("T-test r^2 effect size of synthetic TP53 Wildtype vs."
-                           " real mutated"))
-        plt.scatter(SyntheticNotStat, SyntheticNotPVal, c='b', alpha=0.03,
-                    label="T-test PVal of synthetic TP53 Wildtype vs. real mutated")
-        plt.xlabel("T-test stat of synthetic TP53 Wildtype vs. real mutated")
-        plt.ylabel("r^2 Effect size and PVal")
-        lgd = plt.legend(ncol=1,
-                         bbox_to_anchor=(1.03, 1),
-                         loc=2,
-                         borderaxespad=0.,
-                         fontsize=10)
+        plt.scatter(SyntheticNotEffect, -np.log10(SyntheticNotPVal), c='r',
+                    alpha=0.03)
+        plt.xlabel("Effect size of synthetic TP53 Wildtype vs. real mutated")
+        plt.ylabel("Negative log 10 PVal")
         plt.savefig(os.path.join('Output', params.dataSetInfo.name,
                                  'VolcanoSynthNot_{}.png'.
                                  format(str(params.outputNum))),
-                    bbox_extra_artists=(lgd,),
                     bbox_inches='tight')
 
-        allSynthEffectSize = np.divide(np.square(AllSyntheticStat),
-                                       np.add(np.square(AllSyntheticStat), dF))
         plt.figure()
-        plt.title("Volcano Plot of the t-test between synthetic TP53"
+        plt.title("Volcano Plot of the effect and PVal between synthetic TP53"
                   " wildtype vs. synthetic TP53 mutated")
-        plt.scatter(AllSyntheticStat, allSynthEffectSize, c='r', alpha=0.03,
-                    label=("T-test r^2 effect size of synthetic TP53 Wildtype vs."
-                           " synthetic mutated"))
-        plt.scatter(AllSyntheticStat, AllSyntheticPVal, c='b', alpha=0.03,
-                    label="T-test PVal of synthetic TP53 Wildtype vs. synthetic mutated")
-        plt.xlabel("T-test stat of synthetic TP53 Wildtype vs. synthetic mutated")
-        plt.ylabel("r^2 Effect size and PVal")
-        lgd = plt.legend(ncol=1,
-                         bbox_to_anchor=(1.03, 1),
-                         loc=2,
-                         borderaxespad=0.,
-                         fontsize=10)
+        plt.scatter(AllSyntheticEffect, -np.log10(AllSyntheticPVal), c='r',
+                    alpha=0.03)
+        plt.xlabel("Effect size of synthetic TP53 Wildtype vs."
+                   " synthetic mutated")
+        plt.ylabel("Negative log 10 PVal")
         plt.savefig(os.path.join('Output', params.dataSetInfo.name,
                                  'VolcanoAllSynth_{}.png'.
                                  format(str(params.outputNum))),
-                    bbox_extra_artists=(lgd,),
                     bbox_inches='tight')
-        '''
         plt.show()
 
         #######################################################################
