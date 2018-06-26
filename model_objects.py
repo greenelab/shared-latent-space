@@ -20,7 +20,7 @@ class model_parameters(object):
                  secondLayerSize,
                  thirdLayerSize,
                  encodedSize, inputSizeRight, firstLayerSizeRight, kappa,
-                 noise, notes, dataSetInfo):
+                 beta, noise, notes, dataSetInfo):
         """
         Takes in parameters of the model and data set info.
 
@@ -36,6 +36,7 @@ class model_parameters(object):
             firstLayerSizeRight (int): Size of the first layer of the right.
             dataSetInfo (DataSetInfoAbstractClass): Data specific functions.
             kappa (float): The kappa variable for warm start.
+            beta (float): Initial Value for Beta variable for warm start.
             noise (float): the amount of noise for input.
             notes (string): Any special notes about the run.
 
@@ -54,6 +55,7 @@ class model_parameters(object):
         self.firstLayerSizeRight = firstLayerSizeRight
 
         self.kappa = kappa
+        self.beta = beta
         self.noise = noise
 
         self.notes = notes

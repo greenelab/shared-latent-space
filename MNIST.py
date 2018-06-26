@@ -76,6 +76,7 @@ class dataInfo(dataSetInfoAbstract):
         Visualizes all of the data passed to it.
 
         Args:
+            modelHandle (model): Holds all the components of the model
             leftPredicted (array of floats): The latent space predictions
             rightPredicted (array of floats): The latent space predictions
             rightDomain (array of floats): Right input.
@@ -101,7 +102,7 @@ class dataInfo(dataSetInfoAbstract):
             rightToLeftImgs (array of floats): Right input encoded and decoded
                                                as left.
             params (model_parameters): Parameters of the model.
-            n (int): Defaults to 10, number of visualizations.
+            n (int): Defaults to 10
 
         Returns: None
         """

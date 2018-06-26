@@ -63,6 +63,8 @@ def get_args():
                         type=int)
     parser.add_argument("--kappa",  help="Kappa for warmstart",
                         type=float, default=.1)
+    parser.add_argument("--beta",  help="Beta for warmstart",
+                        type=float, default=1)
     parser.add_argument("--noise",  help="Noise",
                         type=float, default=0)
     parser.add_argument("--notes",  help="Notes",
@@ -110,6 +112,7 @@ model_parameters = model_parameters(
     inputSizeRight=a_train.shape[1],
     firstLayerSizeRight=args.firstLayerSizeRight,
     kappa=args.kappa,
+    beta=args.beta,
     noise=args.noise,
     notes=args.notes,
     dataSetInfo=dataSetInfo)

@@ -63,8 +63,8 @@ class shared_vae_class(object):
         self.params = model_parameters
 
         # Variables for warm start
-        self.betaRight = K.variable(1)
-        self.betaLeft = K.variable(1)
+        self.betaRight = K.variable(model_parameters.beta)
+        self.betaLeft = K.variable(model_parameters.beta)
         self.kappa = self.params.kappa
 
     def compile_model(self):
@@ -238,6 +238,7 @@ class shared_vae_class(object):
         # Define custom learn rate
         adam = Adam(lr=.001)
 
+        # Define the left and right models
         outputs = self.leftDecoder(self.leftEncoder(leftEncoderInput))
         self.leftModel = Model(leftEncoderInput, outputs)
         self.leftModel.compile(
@@ -352,15 +353,19 @@ class shared_vae_class(object):
                                  'Loss_{}.png'.
                                  format(str(self.params.outputNum))))
 
+        # Creeate a table with the model parameters
         table_data = dict(values=[[str(self.params.numEpochs)],
                                   [str(self.params.firstLayerSizeLeft)],
                                   [str(self.params.inputSizeLeft)],
                                   # [str(self.params.secondLayerSize)],
                                   # [str(self.params.thirdLayerSize)],
                                   [str(self.params.encodedSize)],
-                                  [str(self.params.firstLayerSizeRight)], [
-            str(self.params.inputSizeRight)], [str(self.params.kappa)],
-            [str(self.params.noise)], [self.params.notes]])
+                                  [str(self.params.firstLayerSizeRight)],
+                                  [str(self.params.inputSizeRight)],
+                                  [str(self.params.kappa)],
+                                  [str(self.params.beta)],
+                                  [str(self.params.noise)],
+                                  [self.params.notes]])
         table_labels = dict(values=['Epochs', 'First Layer Left',
                                     'Input Size Left',
                                     # 'Second Layer',
@@ -368,6 +373,7 @@ class shared_vae_class(object):
                                     'Encoded Size',
                                     'First Layer Right',
                                     'inputSizeRight', 'Kappa',
+                                    'Intial Beta Value',
                                     'Noise level', 'notes'])
         table = [go.Table(cells=table_data, header=table_labels)]
 
@@ -469,7 +475,7 @@ class shared_vae_class(object):
          right_decoded_imgs_noise) = (self.rightToLeftModel.
                                       predict(rightRandomNoise))
 
-        # Create the Noise cycle images
+        # Create the Noise cycle
         (leftToRightCycleNoise, _) = self.rightToLeftModel.predict(
             leftToRightImgsNoise)
         (_, rightToLeftCycleNoise) = self.leftToRightModel.predict(

@@ -10,10 +10,11 @@ of the file.
 
 
 Author: Chris Williams
-Date: 5/22/18
+Date: 6/26/18
 """
 import os
 import cPickle
+import copy
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -93,6 +94,7 @@ class dataInfo(dataSetInfoAbstract):
         Visualizes all of the data passed to it.
 
         Args:
+            modelHandle (model): Holds all the components of the model
             leftPredicted (array of floats): The latent space predictions
             rightPredicted (array of floats): The latent space predictions
             rightDomain (array of floats): Right input.
@@ -118,10 +120,15 @@ class dataInfo(dataSetInfoAbstract):
             rightToLeftImgs (array of floats): Right input encoded and decoded
                                                as left.
             params (model_parameters): Parameters of the model.
-            n (int): Defaults to 10, this doesn't apply to this visualization
+            n (int): Defaults to 100
 
         Returns: None
         """
+
+        #######################################################################
+        # For calculating the t-test between the MSE of real and generated data
+
+        # Find all TP53 wildtype examples and their gene expressions
         TP53Wildtype = np.array(rightDomain[0, :])
         TP53WildtypeExp = np.array(leftDomain[0, :])
 
@@ -131,6 +138,7 @@ class dataInfo(dataSetInfoAbstract):
                 TP53WildtypeExp = np.vstack(
                     (TP53WildtypeExp, leftDomain[x, :]))
 
+        # Find all TP53 mutated examples and their gene expressions
         TP53Not = np.array(rightDomain[0, :])
         TP53NotExp = np.array(leftDomain[0, :])
 
@@ -139,6 +147,7 @@ class dataInfo(dataSetInfoAbstract):
                 TP53Not = np.vstack((TP53Not, rightDomain[x, :]))
                 TP53NotExp = np.vstack((TP53NotExp, leftDomain[x, :]))
 
+        # Pick a random grouping of these examples
         randIndexes = np.random.randint(
             0, min(TP53Wildtype.shape[0], TP53Not.shape[0]) - 1,
             (n,))
@@ -147,40 +156,41 @@ class dataInfo(dataSetInfoAbstract):
         TP53Wildtype = TP53Wildtype[randIndexes]
         TP53WildtypeExp = TP53WildtypeExp[randIndexes]
 
-        print randIndexes.shape
-
         TP53Not = TP53Not[1:]
         TP53NotExp = TP53NotExp[1:]
         TP53Not = TP53Not[randIndexes]
         TP53NotExp = TP53NotExp[randIndexes]
 
+        # Predict based on the mutations
         (TP53WildTypeToExp, _) = modelHandle.rightToLeftModel.predict(
                                                               TP53Wildtype)
 
+        # Find the Mean Squared Error
         TP53WildTypeToExpMSE = np.square(np.subtract(
             TP53WildtypeExp, TP53WildTypeToExp)).mean(axis=0)
 
-        import copy
-
+        # Create arrays from induced samples
         TP53Induced = copy.copy(TP53Wildtype)
         TP53InducedExp = copy.copy(TP53WildtypeExp)
 
+        # Induce a TP53 mutation
         TP53Induced[:, 485] = 1
 
+        # Predict based on this mutation
         (TP53InducedToExp, _) = modelHandle.rightToLeftModel.predict(
                                                              TP53Induced)
 
+        # Find the Mean Squared Error
         TP53InducedToExpMSE = np.square(np.subtract(
             TP53InducedExp, TP53InducedToExp)).mean(axis=0)
 
+        # Run a t test on the MSE's
         ttest_results = scipy.stats.ttest_ind(
             TP53WildTypeToExpMSE, TP53InducedToExpMSE)
         t_stat = ttest_results.statistic
         p_val = ttest_results.pvalue
 
-        print t_stat
-        print p_val
-
+        # Print a table with the t test results
         table_data = dict(values=[[t_stat], [p_val]])
         table_labels = dict(values=['Stat', 'PVal'])
         table = [go.Table(cells=table_data, header=table_labels)]
@@ -189,59 +199,68 @@ class dataInfo(dataSetInfoAbstract):
                                                      params.dataSetInfo.name,
                                                      't_test_{}'.format(
                                                       str(params.outputNum))))
+        #######################################################################
+        # For Scatter Plot of the differentially expressed genes between
+        # real TP53 wildtype vs. real TP53 mutated and
+        # real vs. synthetic TP53 data
 
+        # Induce wiltype TP53
         TP53NotInduced = copy.copy(TP53Not)
         TP53NotInduced[:, 485] = 0
 
         (TP53NotInducedToExp, _) = modelHandle.rightToLeftModel.predict(
                                                                 TP53NotInduced)
 
-        SyntheticStat = np.array([])
+        # Perform t-tests for all four situations of real and synthetic data
+        SyntheticEffect = np.array([])
         SyntheticPVal = np.array([])
         for x in range(0, leftDomain.shape[1]):
-            ttest_results = scipy.stats.ttest_ind(
+            regressResults = scipy.stats.linregress(
                 TP53WildtypeExp[:, x], TP53InducedToExp[:, x])
-            SyntheticStat = np.append(SyntheticStat, ttest_results.statistic)
-            SyntheticPVal = np.append(SyntheticPVal, ttest_results.pvalue)
+            SyntheticEffect = np.append(SyntheticEffect, regressResults.slope)
+            SyntheticPVal = np.append(SyntheticPVal, regressResults.pvalue)
 
-        RealStat = np.array([])
+        RealEffect = np.array([])
         RealPVal = np.array([])
         for x in range(0, leftDomain.shape[1]):
-            ttest_results = scipy.stats.ttest_ind(
+            regressResults = scipy.stats.linregress(
                 TP53NotExp[:, x], TP53WildtypeExp[:, x])
-            RealStat = np.append(RealStat, ttest_results.statistic)
-            RealPVal = np.append(RealPVal, ttest_results.pvalue)
+            RealEffect = np.append(RealEffect, regressResults.statistic)
+            RealPVal = np.append(RealPVal, regressResults.pvalue)
 
-        SyntheticNotStat = np.array([])
+        SyntheticNotEffect = np.array([])
         SyntheticNotPVal = np.array([])
         for x in range(0, leftDomain.shape[1]):
-            ttest_results = scipy.stats.ttest_ind(
+            regressResults = scipy.stats.linregress(
                 TP53NotExp[:, x], TP53NotInducedToExp[:, x])
-            SyntheticNotStat = np.append(
-                SyntheticNotStat, ttest_results.statistic)
+            SyntheticNotEffect = np.append(
+                SyntheticNotEffect, regressResults.statistic)
             SyntheticNotPVal = np.append(
-                SyntheticNotPVal, ttest_results.pvalue)
+                SyntheticNotPVal, regressResults.pvalue)
 
-        AllSyntheticStat = np.array([])
+        AllSyntheticEffect = np.array([])
         AllSyntheticPVal = np.array([])
         for x in range(0, leftDomain.shape[1]):
-            ttest_results = scipy.stats.ttest_ind(
+            regressResults = scipy.stats.linregress(
                 TP53InducedToExp[:, x], TP53NotInducedToExp[:, x])
-            AllSyntheticStat = np.append(
-                AllSyntheticStat, ttest_results.statistic)
+            AllSyntheticEffect = np.append(
+                AllSyntheticEffect, regressResults.statistic)
             AllSyntheticPVal = np.append(
-                AllSyntheticPVal, ttest_results.pvalue)
+                AllSyntheticPVal, regressResults.pvalue)
 
+        # Make a scatter plot of the difference between three of the t-tests
+        # Shows the differnece between the transformed domains and the actual
+        # difference in the real data.
         plt.figure()
-        plt.title("Scatter Plot of the t-test difference between real TP53"
-                  " wildtype vs. real TP53 mutated and real vs. synthetic"
-                  " TP53 data")
-        plt.scatter(RealStat, SyntheticStat, c='r', alpha=0.03,
+        plt.title("Scatter Plot of the differentially expressed genes between"
+                  "real TP53 wildtype vs. real TP53 mutated and real vs."
+                  " synthetic TP53 data")
+        plt.scatter(RealEffect, SyntheticEffect, c='r', alpha=0.03,
                     label="Real TP53 Wildtype vs. Synthetic TP53 Mutated")
-        plt.scatter(RealStat, SyntheticNotStat, c='b', alpha=0.03,
+        plt.scatter(RealEffect, SyntheticNotEffect, c='b', alpha=0.03,
                     label="Real TP53 Mutated vs. Synthetic TP53 Wildtype")
-        plt.xlabel("T-test stat of real TP53 Wildtype vs. real mutated")
-        plt.ylabel("T-test stat of real and synthetic data")
+        plt.xlabel("Effect of real TP53 Wildtype vs. real mutated")
+        plt.ylabel("PVal of real and synthetic data")
         lgd = plt.legend(ncol=1,
                          bbox_to_anchor=(1.03, 1),
                          loc=2,
@@ -253,13 +272,21 @@ class dataInfo(dataSetInfoAbstract):
                     bbox_extra_artists=(lgd,),
                     bbox_inches='tight')
 
+        #######################################################################
+        # For creating bar graphs of latent space expression between
+        # TP53 Wiltype and TP53 mutated
+
+        # Find the difference in the nodes between TP53 wildtyupe and mutated
+        # in the right model
         TP53WildtypeLatent = modelHandle.rightEncoder.predict(TP53Wildtype)
         TP53NotLatent = modelHandle.rightEncoder.predict(TP53Not)
 
+        # Turn this into a percentage difference
         LantentSpacePerc = (TP53WildtypeLatent - TP53NotLatent) / TP53NotLatent
 
         LantentSpacePerc = LantentSpacePerc.mean(axis=0)
 
+        # Create a bar graph showing which nodes are most different
         plt.figure()
         plt.bar(np.arange(LantentSpacePerc.shape[0]), LantentSpacePerc)
         title = plt.title("Percentage difference between TP53 Wildtype and"
@@ -272,10 +299,7 @@ class dataInfo(dataSetInfoAbstract):
                     bbox_extra_artists=(title,),
                     bbox_inches='tight')
 
-        maxInd = np.argmax(LantentSpacePerc)
-        print TP53WildtypeLatent.mean(axis=0)[maxInd]
-        print TP53NotLatent.mean(axis=0)[maxInd]
-
+        # Repeat the same process of latent space analysis for the left model
         TP53WildtypeExpLatent = modelHandle.leftEncoder.predict(
                                                         TP53WildtypeExp)
         TP53NotExpLatent = modelHandle.leftEncoder.predict(TP53NotExp)
@@ -296,33 +320,21 @@ class dataInfo(dataSetInfoAbstract):
                     bbox_extra_artists=(title,),
                     bbox_inches='tight')
 
-        # Degrees of freedom
-        dF = 2 * n - 2
-        dF = np.repeat(dF, RealStat.shape[0])
-        # Calculate the r^2 effect size for all real
-        realEffectSize = np.divide(np.square(RealStat),
-                                   np.add(np.square(RealStat), dF))
+        #######################################################################
+        # Create volcano plots for all four of the differential regressions
+
         plt.figure()
-        plt.title("Volcano Plot of the t-test between real TP53"
+        plt.title("Volcano Plot of the differentially expressed genes and"
+                  " effect between real TP53"
                   " wildtype vs. real TP53 mutated")
-        plt.scatter(RealStat, realEffectSize, c='r', alpha=0.03,
-                    label=("T-test r^2 effect size of real TP53 Wildtype vs."
-                           " real mutated"))
-        plt.scatter(RealStat, RealPVal, c='b', alpha=0.03,
-                    label="T-test PVal of real TP53 Wildtype vs. real mutated")
-        plt.xlabel("T-test stat of real TP53 Wildtype vs. real mutated")
-        plt.ylabel("r^2 Effect size and PVal")
-        lgd = plt.legend(ncol=1,
-                         bbox_to_anchor=(1.03, 1),
-                         loc=2,
-                         borderaxespad=0.,
-                         fontsize=10)
+        plt.scatter(RealEffect, -np.log10(RealPVal), c='r', alpha=0.03)
+        plt.xlabel("Effect size of real TP53 Wildtype vs. real mutated")
+        plt.ylabel("negative log 10 PVal")
         plt.savefig(os.path.join('Output', params.dataSetInfo.name,
                                  'VolcanoReal_{}.png'.
                                  format(str(params.outputNum))),
-                    bbox_extra_artists=(lgd,),
                     bbox_inches='tight')
-
+        '''
         synthEffectSize = np.divide(np.square(SyntheticStat),
                                     np.add(np.square(SyntheticStat), dF))
         plt.figure()
@@ -391,14 +403,19 @@ class dataInfo(dataSetInfoAbstract):
                                  format(str(params.outputNum))),
                     bbox_extra_artists=(lgd,),
                     bbox_inches='tight')
+        '''
         plt.show()
 
+        #######################################################################
+        # Create UMaps of the latent spaces for each model
 
+        # Load the canver labels of the data
         file = os.path.join('Data', 'Cognoma_Data', 'Training',
                             'cancerLabels.csv')
         with open(file, "rb") as fp:
             labels = cPickle.load(fp)
 
+        # Create a UMap of the latent space with the labels in left model
         umap = up.UMAP(n_neighbors=5,
                        min_dist=0.1,
                        metric='correlation')
@@ -418,6 +435,7 @@ class dataInfo(dataSetInfoAbstract):
                     bbox_extra_artists=(title,),
                     bbox_inches='tight')
 
+        # Create a UMap of the latent space with the labels in right model
         umap = up.UMAP(n_neighbors=5,
                        min_dist=0.1,
                        metric='correlation')
@@ -436,14 +454,19 @@ class dataInfo(dataSetInfoAbstract):
                     bbox_extra_artists=(title,),
                     bbox_inches='tight')
 
-        rightDomainFloat = rightDomain.astype('float64')
+        #######################################################################
+        # Visualize as images
 
+        # Make the right domain into floats
+        rightDomainFloat = rightDomain.astype('float64')
+        # Pick a random number of examples to display
         randIndexes = np.random.randint(0, rightDomain.shape[0], (10,))
 
+        # Show the randomly selected samples as images
         plt.figure(figsize=(120, 40))
         for i in range(10):
 
-            # display original Depth Map
+            # display original mutated
             ax = plt.subplot(6, 10, i + 1)
             plt.imshow(rightDomainFloat[randIndexes[i]].
                        reshape(self.rightXDim,
@@ -453,7 +476,7 @@ class dataInfo(dataSetInfoAbstract):
             if (i == 0):
                 ax.set_title("Right Domain (Mutated) Truth")
 
-            # display depth map reconstruction
+            # display mutated reconstruction
             ax = plt.subplot(6, 10, i + 1 + 10)
             plt.imshow(right_decoded_imgs[randIndexes[i]]
                        .reshape(self.rightXDim,
@@ -463,7 +486,7 @@ class dataInfo(dataSetInfoAbstract):
             if (i == 0):
                 ax.set_title("Right Domain (Mutated) Reconstructed")
 
-            # display depth map reconstruction
+            # display mutated translated into expression
             ax = plt.subplot(6, 10, i + 1 + 2 * 10)
             plt.imshow(rightToLeftImgs[randIndexes[i]]
                        .reshape(self.leftXDim,
@@ -473,7 +496,7 @@ class dataInfo(dataSetInfoAbstract):
             if (i == 0):
                 ax.set_title("Right Domain (Mutated) translated into Left")
 
-            # display right to left transformed cycled through
+            # display original expression
             ax = plt.subplot(6, 10, i + 1 + 3 * 10)
             plt.imshow(leftDomain[randIndexes[i]].reshape(self.leftXDim,
                                                           self.leftYDim))
@@ -482,7 +505,7 @@ class dataInfo(dataSetInfoAbstract):
             if (i == 0):
                 ax.set_title("Left Domain (Expression) Truth")
 
-            # display depth generated
+            # display expression reconstruction
             ax = plt.subplot(6, 10, i + 1 + 4 * 10)
             plt.imshow(left_decoded_imgs[randIndexes[i]]
                        .reshape(self.leftXDim,
@@ -492,7 +515,7 @@ class dataInfo(dataSetInfoAbstract):
             if (i == 0):
                 ax.set_title("Left Domain (Expression) Reconstructed")
 
-            # display depth generated
+            # display expression translated into mutated
             ax = plt.subplot(6, 10, i + 1 + 5 * 10)
             plt.imshow(leftToRightImgs[randIndexes[i]]
                        .reshape(self.rightXDim,
@@ -502,9 +525,14 @@ class dataInfo(dataSetInfoAbstract):
             if (i == 0):
                 ax.set_title("Left Domain (Expression) translated into Right")
 
+        # Save visualization
         plt.savefig(os.path.join('Output', 'Cognoma',
                                  'Visualized_{}.png'.
                                  format(str(params.outputNum))))
+
+        #######################################################################
+        # Create Heirical cluster maps for left and right domains comparing
+        # real, reconstructed, and transformed data
 
         # Make matrix of data for cluster map for the Right Domain
         num_examples = n
@@ -523,14 +551,14 @@ class dataInfo(dataSetInfoAbstract):
                       np.full(num_examples, 2),
                       axis=0)
 
-        # Make the column labels for the cluster map
+        # Make the column labels for the cluster map for right domain
         index = 0
         for x in range(1, params.inputSizeRight):
             index = np.append(index, x)
 
         cluster = pd.DataFrame(X.transpose(), index=index, columns=y)
 
-        # Buils the color labels for cluster map
+        # Build the color labels for cluster map
         label_colors = np.repeat(sns.dark_palette("blue", 1, reverse=True),
                                  num_examples, axis=0)
 
@@ -563,7 +591,7 @@ class dataInfo(dataSetInfoAbstract):
                     bbox_extra_artists=(title,),
                     bbox_inches='tight')
 
-        # For the Left Domain
+        # Cluster map for the left domain
         random = np.random.randint(0, num_examples,
                                    size=num_examples)
         X = np.append(leftDomain[random, :],
@@ -616,5 +644,4 @@ class dataInfo(dataSetInfoAbstract):
                     bbox_extra_artists=(title,),
                     bbox_inches='tight')
 
-        # plt.show()
         return
