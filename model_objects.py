@@ -20,7 +20,7 @@ class model_parameters(object):
                  secondLayerSize,
                  thirdLayerSize,
                  encodedSize, inputSizeRight, firstLayerSizeRight, kappa,
-                 beta, noise, notes, dataSetInfo):
+                 beta, noise, dropout, notes, dataSetInfo):
         """
         Takes in parameters of the model and data set info.
 
@@ -38,7 +38,9 @@ class model_parameters(object):
             kappa (float): The kappa variable for warm start.
             beta (float): Initial Value for Beta variable for warm start.
             noise (float): the amount of noise for input.
+            dropoout (float): Amount of dropout to be applied
             notes (string): Any special notes about the run.
+            dataSetInfo (dataSetInfoAbstract): Data set info
 
         Returns: None
         """
@@ -57,6 +59,7 @@ class model_parameters(object):
         self.kappa = kappa
         self.beta = beta
         self.noise = noise
+        self.dropout = dropout
 
         self.notes = notes
 

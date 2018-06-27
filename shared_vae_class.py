@@ -123,7 +123,8 @@ class shared_vae_class(object):
             activation='relu')(leftEncoderInput)
         # leftEncoderFirstLayerNorm = BatchNormalization()
         #                             (leftEncoderFirstLayer)
-        leftEncoderFirstLayerDropOut = Dropout(0)(leftEncoderFirstLayer)
+        leftEncoderFirstLayerDropOut = Dropout(
+            self.params.dropout)(leftEncoderFirstLayer)
 
         '''
         leftEncoderSecondLayer = Dense(
@@ -131,7 +132,8 @@ class shared_vae_class(object):
             activation='relu')(leftEncoderFirstLayerDropOut)
         leftEncoderSecondLayerNorm = BatchNormalization()
                                       (leftEncoderSecondLayer)
-        leftEncoderSecondLayerDropOut = Dropout(.5)(leftEncoderSecondLayerNorm)
+        leftEncoderSecondLayerDropOut = Dropout(
+            self.params.dropout)(leftEncoderSecondLayerNorm)
         '''
 
         rightEncoderInput = Input(shape=(self.params.inputSizeRight,))
@@ -141,26 +143,26 @@ class shared_vae_class(object):
             activation='relu')(rightEncoderInput)
         # rightEncoderFirstLayerNorm = BatchNormalization()
         #                               (rightEncoderFirstLayer)
-        rightEncoderFirstLayerDropOut = Dropout(0)(rightEncoderFirstLayer)
+        rightEncoderFirstLayerDropOut = Dropout(
+            self.params.dropout)(rightEncoderFirstLayer)
         '''
         rightEncoderSecondLayer = Dense(
             self.params.secondLayerSize,
             activation='relu')(rightEncoderFirstLayerDropOut)
         rightEncoderSecondLayerNorm = BatchNormalization()
-                                        (rightEncoderSecondLayer)
-        rightEncoderSecondLayerDropOut = Dropout(.5)
-                                           (rightEncoderSecondLayerNorm)
+            (rightEncoderSecondLayer)
+        rightEncoderSecondLayerDropOut = Dropout(
+            self.params.dropout)(rightEncoderSecondLayerNorm)
         '''
-
         '''
         encoderMergeLayer = Dense(
             self.params.thirdLayerSize, activation='relu')
         leftMerge = encoderMergeLayer(leftEncoderInput)
         leftMergeNorm = BatchNormalization()(leftMerge)
-        leftMergeDropOut = Dropout(0.5)(leftMergeNorm)
+        leftMergeDropOut = Dropout(self.params.dropout)(leftMergeNorm)
         rightMerge = encoderMergeLayer(rightEncoderInput)
         rightMergeNorm = BatchNormalization()(rightMerge)
-        rightMergeDropOut = Dropout(0.5)(rightMergeNorm)
+        rightMergeDropOut = Dropout(self.params.dropout)(rightMergeNorm)
         '''
 
         z_mean = Dense(self.params.encodedSize)
@@ -186,14 +188,16 @@ class shared_vae_class(object):
             self.params.thirdLayerSize,
             activation='relu')(decoderInputs)
         decoderFirstLayerNorm = BatchNormalization()(decoderFirstLayer)
-        decoderFirstLayerDropOut = Dropout(0.5)(decoderFirstLayerNorm)
+        decoderFirstLayerDropOut = Dropout(
+            self.params.dropout)(decoderFirstLayerNorm)
         '''
         '''
         decoderSecondLayer = Dense(
             self.params.secondLayerSize,
             activation='relu')(decoderFirstLayerDropOut)
         decoderSecondLayerNorm = BatchNormalization()(decoderSecondLayer)
-        decoderSecondLayerDropOut = Dropout(0.5)(decoderSecondLayerNorm)
+        decoderSecondLayerDropOut = Dropout(
+            self.params.dropout)(decoderSecondLayerNorm)
         '''
 
         leftDecoderThirdLayer = Dense(
@@ -201,7 +205,8 @@ class shared_vae_class(object):
             activation='relu')(decoderInputs)
         # leftDecoderThirdLayerNorm = BatchNormalization()
         #                              (leftDecoderThirdLayer)
-        leftDecoderThirdLayerDropOut = Dropout(0)(leftDecoderThirdLayer)
+        leftDecoderThirdLayerDropOut = Dropout(
+            self.params.dropout)(leftDecoderThirdLayer)
         leftDecoderFinal = Dense(
             self.params.inputSizeLeft)(leftDecoderThirdLayerDropOut)
         # leftDecoderOutputNorm = BatchNormalization()(leftDecoderFinal)
@@ -212,7 +217,8 @@ class shared_vae_class(object):
             activation='relu')(decoderInputs)
         # rightDecoderThirdLayerNorm = BatchNormalization()
         #                               (rightDecoderThirdLayer)
-        rightDecoderThirdLayerDropOut = Dropout(0)(rightDecoderThirdLayer)
+        rightDecoderThirdLayerDropOut = Dropout(
+            self.params.dropout)(rightDecoderThirdLayer)
         rightDecoderFinal = Dense(
             self.params.inputSizeRight)(rightDecoderThirdLayerDropOut)
         # rightDecoderOutputNorm = BatchNormalization()(rightDecoderFinal)
@@ -494,6 +500,7 @@ class shared_vae_class(object):
 
 class custom_callback(Callback):
     # For logging the loss throughout training
+
     def __init__(self, loss_data, val_loss):
         self.loss_data = loss_data
         self.val_loss = val_loss

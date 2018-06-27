@@ -67,6 +67,8 @@ def get_args():
                         type=float, default=1)
     parser.add_argument("--noise",  help="Noise",
                         type=float, default=0)
+    parser.add_argument("--dropout",  help="Dropout",
+                        type=float, default=0)
     parser.add_argument("--notes",  help="Notes",
                         type=str, default="N/A")
     args = parser.parse_args()
@@ -115,6 +117,7 @@ model_parameters = model_parameters(
     beta=args.beta,
     noise=args.noise,
     notes=args.notes,
+    dropout=args.dropout,
     dataSetInfo=dataSetInfo)
 
 # Calculate which number run it is, so then the output will have a unique name

@@ -54,6 +54,9 @@ class dataInfo(dataSetInfoAbstract):
         self.rightDomainName = "Mutation"
         self.leftDomainName = "Expression"
 
+        # For Cognoma evaluation, which mutation to induce and compare
+        self.mutationID = 485
+
     def load(self):
         """
         Loads the testing and training data from pickle files.
@@ -129,64 +132,64 @@ class dataInfo(dataSetInfoAbstract):
         # For calculating the t-test between the MSE of real and generated data
 
         # Find all TP53 wildtype examples and their gene expressions
-        TP53Wildtype = np.array(rightDomain[0, :])
-        TP53WildtypeExp = np.array(leftDomain[0, :])
+        SNPpresent = np.array(rightDomain[0, :])
+        SNPpresentExp = np.array(leftDomain[0, :])
 
-        for x in range(1, rightDomain.shape[0]):
-            if rightDomain[x, 485] == 0:
-                TP53Wildtype = np.vstack((TP53Wildtype, rightDomain[x, :]))
-                TP53WildtypeExp = np.vstack(
-                    (TP53WildtypeExp, leftDomain[x, :]))
+        for x in range(rightDomain.shape[0]):
+            if rightDomain[x, self.mutationID] == 0:
+                SNPpresent = np.vstack((SNPpresent, rightDomain[x, :]))
+                SNPpresentExp = np.vstack(
+                    (SNPpresentExp, leftDomain[x, :]))
 
         # Find all TP53 mutated examples and their gene expressions
-        TP53Not = np.array(rightDomain[0, :])
-        TP53NotExp = np.array(leftDomain[0, :])
+        SNPabsent = np.array(rightDomain[0, :])
+        SNPabsentExp = np.array(leftDomain[0, :])
 
-        for x in range(1, rightDomain.shape[0]):
-            if rightDomain[x, 485] == 1:
-                TP53Not = np.vstack((TP53Not, rightDomain[x, :]))
-                TP53NotExp = np.vstack((TP53NotExp, leftDomain[x, :]))
+        for x in range(rightDomain.shape[0]):
+            if rightDomain[x, self.mutationID] == 1:
+                SNPabsent = np.vstack((SNPabsent, rightDomain[x, :]))
+                SNPabsentExp = np.vstack((SNPabsentExp, leftDomain[x, :]))
 
         # Pick a random grouping of these examples
         randIndexes = np.random.randint(
-            0, min(TP53Wildtype.shape[0], TP53Not.shape[0]) - 1,
+            0, min(SNPpresent.shape[0], SNPabsent.shape[0]) - 1,
             (n,))
-        TP53Wildtype = TP53Wildtype[1:]
-        TP53WildtypeExp = TP53WildtypeExp[1:]
-        TP53Wildtype = TP53Wildtype[randIndexes]
-        TP53WildtypeExp = TP53WildtypeExp[randIndexes]
+        SNPpresent = SNPpresent[1:]
+        SNPpresentExp = SNPpresentExp[1:]
+        SNPpresent = SNPpresent[randIndexes]
+        SNPpresentExp = SNPpresentExp[randIndexes]
 
-        TP53Not = TP53Not[1:]
-        TP53NotExp = TP53NotExp[1:]
-        TP53Not = TP53Not[randIndexes]
-        TP53NotExp = TP53NotExp[randIndexes]
+        SNPabsent = SNPabsent[1:]
+        SNPabsentExp = SNPabsentExp[1:]
+        SNPabsent = SNPabsent[randIndexes]
+        SNPabsentExp = SNPabsentExp[randIndexes]
 
         # Predict based on the mutations
-        (TP53WildTypeToExp, _) = modelHandle.rightToLeftModel.predict(
-                                                              TP53Wildtype)
+        (SNPpresentToExp, _) = modelHandle.rightToLeftModel.predict(
+                                                              SNPpresent)
 
         # Find the Mean Squared Error
-        TP53WildTypeToExpMSE = np.square(np.subtract(
-            TP53WildtypeExp, TP53WildTypeToExp)).mean(axis=0)
+        SNPpresentToExpMSE = np.square(np.subtract(
+            SNPpresentExp, SNPpresentToExp)).mean(axis=0)
 
-        # Create arrays from induced samples
-        TP53Induced = copy.copy(TP53Wildtype)
-        TP53InducedExp = copy.copy(TP53WildtypeExp)
+        # Create arrays for induced samples
+        InducedMutation = copy.copy(SNPpresent)
+        InducedMutationExp = copy.copy(SNPpresentExp)
 
         # Induce a TP53 mutation
-        TP53Induced[:, 485] = 1
+        InducedMutation[:, self.mutationID] = 1
 
         # Predict based on this mutation
-        (TP53InducedToExp, _) = modelHandle.rightToLeftModel.predict(
-                                                             TP53Induced)
+        (InducedMutationToExp, _) = modelHandle.rightToLeftModel.predict(
+                                                             InducedMutation)
 
         # Find the Mean Squared Error
-        TP53InducedToExpMSE = np.square(np.subtract(
-            TP53InducedExp, TP53InducedToExp)).mean(axis=0)
+        InducedMutationToExpMSE = np.square(np.subtract(
+            InducedMutationExp, InducedMutationToExp)).mean(axis=0)
 
         # Run a t test on the MSE's
         ttest_results = scipy.stats.ttest_ind(
-            TP53WildTypeToExpMSE, TP53InducedToExpMSE)
+            SNPpresentToExpMSE, InducedMutationToExpMSE)
         t_stat = ttest_results.statistic
         p_val = ttest_results.pvalue
 
@@ -205,11 +208,11 @@ class dataInfo(dataSetInfoAbstract):
         # real vs. synthetic TP53 data
 
         # Induce wiltype TP53
-        TP53NotInduced = copy.copy(TP53Not)
-        TP53NotInduced[:, 485] = 0
+        InducedSNPpresent = copy.copy(SNPabsent)
+        InducedSNPpresent[:, self.mutationID] = 0
 
-        (TP53NotInducedToExp, _) = modelHandle.rightToLeftModel.predict(
-                                                                TP53NotInduced)
+        (InducedSNPpresentToExp, _) = modelHandle.rightToLeftModel.predict(
+                                                              InducedSNPpresent)
 
         # Create y points for the linear regressions
         xPoints = np.repeat(0, n)
@@ -218,28 +221,28 @@ class dataInfo(dataSetInfoAbstract):
         # Perform t-tests for all four situations of real and synthetic data
         SyntheticEffect = np.array([])
         SyntheticPVal = np.array([])
-        for x in range(0, leftDomain.shape[1]):
+        for x in range(leftDomain.shape[1]):
             regressResults = scipy.stats.linregress(
                   xPoints,
-                  np.append(TP53WildtypeExp[:, x], TP53InducedToExp[:, x]))
+                  np.append(SNPpresentExp[:, x], InducedMutationToExp[:, x]))
             SyntheticEffect = np.append(SyntheticEffect, regressResults.slope)
             SyntheticPVal = np.append(SyntheticPVal, regressResults.pvalue)
 
         RealEffect = np.array([])
         RealPVal = np.array([])
-        for x in range(0, leftDomain.shape[1]):
+        for x in range(leftDomain.shape[1]):
             regressResults = scipy.stats.linregress(
                   xPoints,
-                  np.append(TP53NotExp[:, x], TP53WildtypeExp[:, x]))
+                  np.append(SNPabsentExp[:, x], SNPpresentExp[:, x]))
             RealEffect = np.append(RealEffect, regressResults.slope)
             RealPVal = np.append(RealPVal, regressResults.pvalue)
 
         SyntheticNotEffect = np.array([])
         SyntheticNotPVal = np.array([])
-        for x in range(0, leftDomain.shape[1]):
+        for x in range(leftDomain.shape[1]):
             regressResults = scipy.stats.linregress(
                   xPoints,
-                  np.append(TP53NotExp[:, x], TP53NotInducedToExp[:, x]))
+                  np.append(SNPabsentExp[:, x], InducedSNPpresentToExp[:, x]))
             SyntheticNotEffect = np.append(
                 SyntheticNotEffect, regressResults.slope)
             SyntheticNotPVal = np.append(
@@ -247,10 +250,11 @@ class dataInfo(dataSetInfoAbstract):
 
         AllSyntheticEffect = np.array([])
         AllSyntheticPVal = np.array([])
-        for x in range(0, leftDomain.shape[1]):
+        for x in range(leftDomain.shape[1]):
             regressResults = scipy.stats.linregress(
                   xPoints,
-                  np.append(TP53InducedToExp[:, x], TP53NotInducedToExp[:, x]))
+                  np.append(InducedMutationToExp[:, x],
+                            InducedSNPpresentToExp[:, x]))
             AllSyntheticEffect = np.append(
                 AllSyntheticEffect, regressResults.slope)
             AllSyntheticPVal = np.append(
@@ -287,11 +291,11 @@ class dataInfo(dataSetInfoAbstract):
 
         # Find the difference in the nodes between TP53 wildtyupe and mutated
         # in the right model
-        TP53WildtypeLatent = modelHandle.rightEncoder.predict(TP53Wildtype)
-        TP53NotLatent = modelHandle.rightEncoder.predict(TP53Not)
+        SNPpresentLatent = modelHandle.rightEncoder.predict(SNPpresent)
+        SNPabsentLatent = modelHandle.rightEncoder.predict(SNPabsent)
 
         # Turn this into a percentage difference
-        LantentSpacePerc = (TP53WildtypeLatent - TP53NotLatent) / TP53NotLatent
+        LantentSpacePerc = (SNPpresentLatent - SNPabsentLatent) / SNPabsentLatent
 
         LantentSpacePerc = LantentSpacePerc.mean(axis=0)
 
@@ -309,12 +313,12 @@ class dataInfo(dataSetInfoAbstract):
                     bbox_inches='tight')
 
         # Repeat the same process of latent space analysis for the left model
-        TP53WildtypeExpLatent = modelHandle.leftEncoder.predict(
-                                                        TP53WildtypeExp)
-        TP53NotExpLatent = modelHandle.leftEncoder.predict(TP53NotExp)
+        SNPpresentExpLatent = modelHandle.leftEncoder.predict(
+                                                        SNPpresentExp)
+        SNPabsentExpLatent = modelHandle.leftEncoder.predict(SNPabsentExp)
 
-        LantentSpacePerc = (TP53WildtypeExpLatent - TP53NotExpLatent)
-        LantentSpacePerc = LantentSpacePerc / TP53NotExpLatent
+        LantentSpacePerc = (SNPpresentExpLatent - SNPabsentExpLatent)
+        LantentSpacePerc = LantentSpacePerc / SNPabsentExpLatent
         LantentSpacePerc = LantentSpacePerc.mean(axis=0)
 
         plt.figure()
