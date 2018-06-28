@@ -212,7 +212,7 @@ class dataInfo(dataSetInfoAbstract):
         InducedSNPpresent[:, self.mutationID] = 0
 
         (InducedSNPpresentToExp, _) = modelHandle.rightToLeftModel.predict(
-                                                              InducedSNPpresent)
+                                                            InducedSNPpresent)
 
         # Create y points for the linear regressions
         xPoints = np.repeat(0, n)
@@ -295,7 +295,8 @@ class dataInfo(dataSetInfoAbstract):
         SNPabsentLatent = modelHandle.rightEncoder.predict(SNPabsent)
 
         # Turn this into a percentage difference
-        LantentSpacePerc = (SNPpresentLatent - SNPabsentLatent) / SNPabsentLatent
+        LantentSpacePerc = (abs(SNPpresentLatent - SNPabsentLatent)
+                            / abs((SNPabsentLatent + SNPabsentLatent)/2))
 
         LantentSpacePerc = LantentSpacePerc.mean(axis=0)
 
@@ -317,8 +318,9 @@ class dataInfo(dataSetInfoAbstract):
                                                         SNPpresentExp)
         SNPabsentExpLatent = modelHandle.leftEncoder.predict(SNPabsentExp)
 
-        LantentSpacePerc = (SNPpresentExpLatent - SNPabsentExpLatent)
-        LantentSpacePerc = LantentSpacePerc / SNPabsentExpLatent
+        LantentSpacePerc = abs(SNPpresentExpLatent - SNPabsentExpLatent)
+        LantentSpacePerc = LantentSpacePerc / abs((SNPpresentExpLatent
+                                                   + SNPabsentExpLatent)/2)
         LantentSpacePerc = LantentSpacePerc.mean(axis=0)
 
         plt.figure()
@@ -331,6 +333,38 @@ class dataInfo(dataSetInfoAbstract):
                                  'TP53ExpLatentSpaceComparrison_{}.png'.
                                  format(str(params.outputNum))),
                     bbox_extra_artists=(title,),
+                    bbox_inches='tight')
+
+        #######################################################################
+        # Make a latent space of percentage difference between the latente
+        # space nodes between the wildtype and mutated
+
+        SNPpresentLatentMean = SNPpresentLatent.mean(axis=0)
+        SNPabsentLatentMean = SNPabsentLatent.mean(axis=0)
+        SNPpresentExpLatentMean = SNPpresentExpLatent.mean(axis=0)
+        SNPabsentExpLatentMean = SNPabsentExpLatent.mean(axis=0)
+
+        # Make a scatter plot of the average present and absent values per node
+        plt.figure()
+        plt.title("Scatter Plot of the latent space expression of wiltype vs."
+                  "mutated")
+        plt.scatter(SNPpresentLatentMean, SNPabsentLatentMean, c='r',
+                    alpha=0.2,
+                    label="Mutation latent space")
+        plt.scatter(SNPpresentExpLatentMean, SNPabsentExpLatentMean, c='b',
+                    alpha=0.2,
+                    label="Expression latent space")
+        plt.xlabel("Latent space expression of wiltype")
+        plt.ylabel("Latent space expression of mutated")
+        lgd = plt.legend(ncol=1,
+                         bbox_to_anchor=(1.03, 1),
+                         loc=2,
+                         borderaxespad=0.,
+                         fontsize=10)
+        plt.savefig(os.path.join('Output', params.dataSetInfo.name,
+                                 'LatentSpaceScatter_{}.png'.
+                                 format(str(params.outputNum))),
+                    bbox_extra_artists=(lgd,),
                     bbox_inches='tight')
 
         #######################################################################
