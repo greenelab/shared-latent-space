@@ -44,11 +44,9 @@ class dataInfo(dataSetInfoAbstract):
         """
         self.name = "Cognoma"
         self.training_file = os.path.join('Data', 'Cognoma_Data', 'Training',
-                                          'Cognoma_Training.pkl')
-        self.testing_file = os.path.join('Data', 'Cognoma_Data', 'Testing',
-                                         'Cognoma_Testing.pkl')
-        self.rightXDim = 40
-        self.rightYDim = 36
+                                          'Cognoma_Training_Large.pkl')
+        self.rightXDim = 45
+        self.rightYDim = 123
         self.leftXDim = 100
         self.leftYDim = 80
         self.rightDomainName = "Mutation"
@@ -307,6 +305,8 @@ class dataInfo(dataSetInfoAbstract):
                           " mutated for each latent space node, Mutation")
         plt.xticks(np.arange(LantentSpacePerc.shape[0]), np.arange(
             LantentSpacePerc.shape[0]))
+        plt.xlabel("Latent Space Nodes")
+        plt.ylabel("Latent Space Percentage Difference")
         plt.savefig(os.path.join('Output', params.dataSetInfo.name,
                                  'TP53MutLatentSpaceComparrison_{}.png'.
                                  format(str(params.outputNum))),
@@ -329,6 +329,8 @@ class dataInfo(dataSetInfoAbstract):
                           " mutated for each latent space node, Expression")
         plt.xticks(np.arange(LantentSpacePerc.shape[0]), np.arange(
             LantentSpacePerc.shape[0]))
+        plt.xlabel("Latent Space Nodes")
+        plt.ylabel("Latent Space Percentage Difference")
         plt.savefig(os.path.join('Output', params.dataSetInfo.name,
                                  'TP53ExpLatentSpaceComparrison_{}.png'.
                                  format(str(params.outputNum))),
@@ -348,14 +350,14 @@ class dataInfo(dataSetInfoAbstract):
         plt.figure()
         plt.title("Scatter Plot of the latent space expression of wiltype vs."
                   "mutated")
-        plt.scatter(SNPpresentLatentMean, SNPabsentLatentMean, c='r',
+        plt.scatter(SNPabsentLatentMean, SNPpresentLatentMean, c='r',
                     alpha=0.2,
                     label="Mutation latent space")
-        plt.scatter(SNPpresentExpLatentMean, SNPabsentExpLatentMean, c='b',
+        plt.scatter(SNPabsentExpLatentMean, SNPpresentExpLatentMean, c='b',
                     alpha=0.2,
                     label="Expression latent space")
-        plt.xlabel("Latent space expression of wiltype")
-        plt.ylabel("Latent space expression of mutated")
+        plt.ylabel("Latent space expression of wiltype")
+        plt.xlabel("Latent space expression of mutated")
         lgd = plt.legend(ncol=1,
                          bbox_to_anchor=(1.03, 1),
                          loc=2,
