@@ -61,24 +61,23 @@ Then add it to the `data_dict` dictionary so the program can link it with the co
 
 To run the file, open command line and enter:
 ```
-python main_file.py --data --batchSize --numEpochs --firstLayerSizeLeft --thirdLayerSize --secondLayerSize --encodedSize --firstLayerSizeRight --kappa --beta --noise --dropout --notes
+python main_file.py --data --batchSize --numEpochs --firstLayerSizeLeft --thirdLayerSize --secondLayerSize   --encodedSize --firstLayerSizeRight --kappa --beta --noise --dropout --notes
 ```
-Command Line Arguments:
-`--data`: the name of the dataset to use.
-`--batchSize`: the batch size to use for training.
-`--numEpochs`: number of epochs to train the model.
-`--firstLayerSizeLeft`: number of nodes in the first hidden layer of the left encoder.
-`--thirdLayerSize`: number of nodes in the third hidden layer, which is shared between the encoders.
-`--secondLayerSize`: number of nodes in the second hidden layer, which is shared between the encoders.
-`--encodedSize`: number of nodes in the shared latent space.
-`--firstLayerSizeRight`: number of nodes in the first hyidden layer of the right encoder.
-`--kappa`: the kappa variable for warm start, how much the beta ramps up each epoch.
-`--beta`: the beta variable for warm start.
-`--noise`: the amount of noise to apply to the training data.
-`--dropout`: the dropout for the model
-`--notes`: a string which will be saved with the parameters for reference notes.
-
-
+Command Line Arguments:  
+`--data`: the name of the dataset to use.  
+`--batchSize`: the batch size to use for training.  
+`--numEpochs`: number of epochs to train the model.  
+`--firstLayerSizeLeft`: number of nodes in the first hidden layer of the left encoder.  
+`--thirdLayerSize`: number of nodes in the third hidden layer, which is shared between the encoders.  
+`--secondLayerSize`: number of nodes in the second hidden layer, which is shared between the encoders.  
+`--encodedSize`: number of nodes in the shared latent space.  
+`--firstLayerSizeRight`: number of nodes in the first hyidden layer of the right encoder.  
+`--kappa`: the kappa variable for warm start, how much the beta ramps up each epoch.  
+`--beta`: the beta variable for warm start.  
+`--noise`: the amount of noise to apply to the training data.  
+`--dropout`: the dropout for the model  
+`--notes`: a string which will be saved with the parameters for reference notes.  
+  
 The `thirdLayerSize` and `secondLayerSize` parameters are for layers that are currently commented out.
 ### `shared_vae_class.py`
 
