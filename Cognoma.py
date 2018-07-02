@@ -314,8 +314,7 @@ class dataInfo(dataSetInfoAbstract):
                     bbox_inches='tight')
 
         # Repeat the same process of latent space analysis for the left model
-        SNPpresentExpLatent = modelHandle.leftEncoder.predict(
-                                                        SNPpresentExp)
+        SNPpresentExpLatent = modelHandle.leftEncoder.predict(SNPpresentExp)
         SNPabsentExpLatent = modelHandle.leftEncoder.predict(SNPabsentExp)
 
         LantentSpacePerc = abs(SNPpresentExpLatent - SNPabsentExpLatent)

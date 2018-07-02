@@ -6,5 +6,5 @@ vae.py
 __pycache__/
 *.tsv
 *.bz2
+*.csv
 pipeline.py
-Data/

@@ -17,3 +17,5 @@ dependencies:
   - conda-forge::tensorflow=1.7.0=0
   - conda-forge::tensorflow-base=1.7.0
   - conda-forge::pydot=1.2.4
+  - conda-forge::plotly=2.7.0
+  - conda-forge::umap-learn=0.2.3
