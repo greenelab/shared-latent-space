@@ -1,6 +1,6 @@
 # Shared Latent Space Variational Autoencoders
 
-## Motivation for application of Shared Latent SPace VAE's In Biology
+## Motivation for application of Shared Latent Space VAE's In Biology
 
 Variational Autoencoders are machine learning models which learn the distribution of the data in a latent space manifold.
 This allows the model to be trained on unsuprivesed data, but learning to recreate the input data, and also allows the model to
@@ -61,7 +61,8 @@ Then add it to the `data_dict` dictionary so the program can link it with the co
 
 To run the file, open command line and enter:
 ```
-python main_file.py --data --batchSize --numEpochs --firstLayerSizeLeft --thirdLayerSize --secondLayerSize   --encodedSize --firstLayerSizeRight --kappa --beta --noise --dropout --notes
+python main_file.py --data --batchSize --numEpochs --firstLayerSizeLeft --thirdLayerSize --secondLayerSize 
+    --encodedSize --firstLayerSizeRight --kappa --beta --noise --dropout --notes
 ```
 Command Line Arguments:  
 `--data`: the name of the dataset to use.  
@@ -81,12 +82,12 @@ Command Line Arguments:
 The `thirdLayerSize` and `secondLayerSize` parameters are for layers that are currently commented out.
 ### `shared_vae_class.py`
 
-This file is the main class which hold the model.
-It contains functions to compile, train, and generate from the model.
+This file holds the model.
+It contains functions to `compile`, `train`, and `generate` from the model.
 The model will take in a series of parameters which control size of layers, etc.
 The model right now is very rigid in structure, but this may change.
 There a 5 different models built inside here for the purposes of training, but they are hidden.
-The generate function calls on the visualize function of the `DataSetInfoAbstract` class.
+The `generate` function calls on the `visualize` function of the `DataSetInfoAbstract` class.
 This will produce an image to help visualize how the model is working.
 There are multiple layers in the model which are commented out, but can be reintroduced if a different
 architecture is desired.
