@@ -29,7 +29,7 @@ class dataInfo(dataSetInfoAbstract):
 
     def __init__(self):
         """
-        Defines the object's name, file locations, image size and domain names
+        Defines the object's name, file locations, image size, and domain names
 
         Args: None
 

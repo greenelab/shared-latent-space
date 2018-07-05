@@ -23,6 +23,7 @@ import pandas as pd
 import plotly as py
 import umap as up
 import plotly.graph_objs as go
+import sklearn as sk
 import scipy
 from scipy import misc
 from sklearn import preprocessing
@@ -72,8 +73,7 @@ class dataInfo(dataSetInfoAbstract):
 
         # a_temp = preprocessing.normalize(a_temp, norm='l2')
 
-        np.random.shuffle(x_temp)
-        np.random.shuffle(a_temp)
+        x_temp, a_temp = sk.utils.shuffle(x_temp, a_temp)
 
         length = x_temp.shape[0]
 

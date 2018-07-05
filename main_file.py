@@ -132,5 +132,5 @@ shared_vae = shared_vae_class(model_parameters)
 shared_vae.compile_model()
 
 # Train the model with: left domain, right domain, and noise
-shared_vae.train_model(x_train, a_train, x_test, a_test, 0)
+shared_vae.train_model(x_train, a_train, x_test, a_test, args.noise)
 shared_vae.generate(x_test, a_test)
