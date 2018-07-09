@@ -13,7 +13,7 @@ Author: Chris Williams
 Date: 6/26/18
 """
 import os
-import cPickle
+import pickle
 import copy
 
 import matplotlib.pyplot as plt
@@ -27,6 +27,7 @@ import sklearn as sk
 import scipy
 from scipy import misc
 from sklearn import preprocessing
+from six.moves import cPickle
 
 # Local files
 from DataSetInfoAbstractClass import dataSetInfoAbstract
@@ -67,7 +68,7 @@ class dataInfo(dataSetInfoAbstract):
                     right training data, right testing data
         """
         with open(self.training_file, "rb") as fp:
-            (x_temp, a_temp) = cPickle.load(fp)
+            (x_temp, a_temp) = cPickle.load(fp, encoding='bytes')
 
         # a_temp = preprocessing.scale(a_temp)
 
@@ -428,7 +429,7 @@ class dataInfo(dataSetInfoAbstract):
         file = os.path.join('Data', 'Cognoma_Data', 'Training',
                             'cancerLabels.csv')
         with open(file, "rb") as fp:
-            labels = cPickle.load(fp)
+            labels = pickle.load(fp)
 
         # Create a UMap of the latent space with the labels in left model
         umap = up.UMAP(n_neighbors=5,

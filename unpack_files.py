@@ -9,7 +9,6 @@ Date: 5/23/18
 """
 
 import os
-import cPickle
 import gzip
 import shutil
 

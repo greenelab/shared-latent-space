@@ -14,11 +14,12 @@ Date: 5/22/18
 """
 
 import os
-import cPickle
+import pickle
 
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+from six.moves import cPickle
 
 # Local files
 from model_objects import model_parameters
@@ -57,7 +58,7 @@ class dataInfo(dataSetInfoAbstract):
         """
 
         with open(self.training_file, "rb") as fp:
-            (x_temp, a_temp) = cPickle.load(fp)
+            (x_temp, a_temp) = pickle.load(fp)
 
         np.random.shuffle(x_temp)
         np.random.shuffle(a_temp)

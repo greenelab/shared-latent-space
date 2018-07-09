@@ -14,14 +14,14 @@ Date: 5/22/18
 """
 
 import os
-import cPickle
+import pickle
 
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
 from scipy import misc
-from keras.datasets import mnist
+from six.moves import cPickle
 
 # Local Files
 from model_objects import model_parameters
@@ -61,9 +61,9 @@ class dataInfo(dataSetInfoAbstract):
 
         # Loading the MNIST Data
         with open(self.training_file, "rb") as fp:
-            (x_train, a_train) = cPickle.load(fp)
+            (x_train, a_train) = pickle.load(fp)
         with open(self.testing_file, "rb") as fp:
-            (x_test, a_test) = cPickle.load(fp)
+            (x_test, a_test) = pickle.load(fp)
         return (x_train, a_train, x_test, a_test)
 
     def visualize(self, modelHandle,

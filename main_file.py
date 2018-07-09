@@ -88,17 +88,16 @@ data_dict = {
 dataSetInfo = data_dict[args.data]
 
 if not os.path.exists(os.path.join('Data',
-                                   '{}_Data'.format(dataSetInfo.name),
+                                   f'{dataSetInfo.name}_Data',
                                    'Training',
-                                   '{}_Training.pkl'.format(dataSetInfo.
-                                                            name))):
+                                   f'{dataSetInfo.name}_Training.pkl')):
     unpackFiles(dataSetInfo.name)
 
 (x_train, a_train, x_test, a_test) = dataSetInfo.load()
 
 print("Finished Loading")
-print x_train.shape
-print a_train.shape
+print(x_train.shape)
+print(a_train.shape)
 
 if not os.path.exists(os.path.join('Output', dataSetInfo.name)):
     os.mkdir(os.path.join('Output', dataSetInfo.name))
@@ -122,7 +121,7 @@ model_parameters = model_parameters(
 
 # Calculate which number run it is, so then the output will have a unique name
 while os.path.exists(os.path.join('Output', dataSetInfo.name,
-                                  "{}.html".format(model_parameters.outputNum)
+                                  f"{model_parameters.outputNum}.html".format()
                                   )):
     model_parameters.outputNum += 1
 

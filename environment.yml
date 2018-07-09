@@ -3,19 +3,18 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - conda-forge::futures=3.2.0
-  - conda-forge::keras=2.1.5
+  - conda-forge::keras=2.2.0
   - conda-forge::matplotlib=2.2.2
-  - conda-forge::numpy=1.14.3
-  - conda-forge::pandas=0.23.0
-  - conda-forge::python=2.7.14
-  - conda-forge::scikit-image=0.13.1
-  - conda-forge::scipy=1.0.0
+  - conda-forge::numpy=1.14.5
+  - conda-forge::pandas=0.23.3
+  - conda-forge::python=3.6.6
+  - conda-forge::scikit-image=0.14.0
+  - conda-forge::scipy=1.1.0
   - conda-forge::seaborn=0.8.1
   - conda-forge::statsmodels=0.9.0
-  - conda-forge::tensorboard=1.7.0
-  - conda-forge::tensorflow=1.7.0=0
-  - conda-forge::tensorflow-base=1.7.0
+  - conda-forge::tensorboard=1.8.0
+  - conda-forge::tensorflow=1.8.0
+  - conda-forge::tensorflow-base=1.8.0
   - conda-forge::pydot=1.2.4
-  - conda-forge::plotly=2.7.0
-  - conda-forge::umap-learn=0.2.3
+  - conda-forge::plotly=3.0.0
+  - conda-forge::umap-learn=0.2.5

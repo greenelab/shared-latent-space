@@ -126,15 +126,15 @@ class shared_vae_class(object):
         leftEncoderFirstLayerDropOut = Dropout(
             self.params.dropout)(leftEncoderFirstLayer)
 
-
+        '''
         leftEncoderSecondLayer = Dense(
             self.params.secondLayerSize,
             activation='relu')(leftEncoderFirstLayerDropOut)
-        # leftEncoderSecondLayerNorm = BatchNormalization()
-        #                              (leftEncoderSecondLayer)
+        leftEncoderSecondLayerNorm = BatchNormalization()
+                                      (leftEncoderSecondLayer)
         leftEncoderSecondLayerDropOut = Dropout(
-            self.params.dropout)(leftEncoderSecondLayer)
-
+            self.params.dropout)(leftEncoderSecondLayerNorm)
+        '''
 
         rightEncoderInput = Input(shape=(self.params.inputSizeRight,))
         # rightEncoderInputNorm = BatchNormalization()(rightEncoderInput)
@@ -145,15 +145,15 @@ class shared_vae_class(object):
         #                               (rightEncoderFirstLayer)
         rightEncoderFirstLayerDropOut = Dropout(
             self.params.dropout)(rightEncoderFirstLayer)
-
+        '''
         rightEncoderSecondLayer = Dense(
             self.params.secondLayerSize,
             activation='relu')(rightEncoderFirstLayerDropOut)
-        # rightEncoderSecondLayerNorm = BatchNormalization()
-        #    (rightEncoderSecondLayer)
+        rightEncoderSecondLayerNorm = BatchNormalization()
+            (rightEncoderSecondLayer)
         rightEncoderSecondLayerDropOut = Dropout(
-            self.params.dropout)(rightEncoderSecondLayer)
-
+            self.params.dropout)(rightEncoderSecondLayerNorm)
+        '''
         '''
         encoderMergeLayer = Dense(
             self.params.thirdLayerSize, activation='relu')
@@ -169,11 +169,11 @@ class shared_vae_class(object):
         z_log_sigma = Dense(self.params.encodedSize)
 
         # These three sets are used in differen models
-        z_meanLeft = z_mean(leftEncoderSecondLayerDropOut)
-        z_log_sigmaLeft = z_log_sigma(leftEncoderSecondLayerDropOut)
+        z_meanLeft = z_mean(leftEncoderFirstLayerDropOut)
+        z_log_sigmaLeft = z_log_sigma(leftEncoderFirstLayerDropOut)
 
-        z_meanRight = z_mean(rightEncoderSecondLayerDropOut)
-        z_log_sigmaRight = z_log_sigma(rightEncoderSecondLayerDropOut)
+        z_meanRight = z_mean(rightEncoderFirstLayerDropOut)
+        z_log_sigmaRight = z_log_sigma(rightEncoderFirstLayerDropOut)
 
         zLeft = Lambda(sampling)([z_meanLeft, z_log_sigmaLeft])
         zRight = Lambda(sampling)([z_meanRight, z_log_sigmaRight])
@@ -184,13 +184,13 @@ class shared_vae_class(object):
 
         # Defining the Decoder with Left and Right Outputs
         decoderInputs = Input(shape=(self.params.encodedSize,))
-        decoderFirstLayer = Dense(
+        '''decoderFirstLayer = Dense(
             self.params.thirdLayerSize,
             activation='relu')(decoderInputs)
-        # decoderFirstLayerNorm = BatchNormalization()(decoderFirstLayer)
+        decoderFirstLayerNorm = BatchNormalization()(decoderFirstLayer)
         decoderFirstLayerDropOut = Dropout(
-            self.params.dropout)(decoderFirstLayer)
-
+            self.params.dropout)(decoderFirstLayerNorm)
+        '''
         '''
         decoderSecondLayer = Dense(
             self.params.secondLayerSize,
@@ -202,7 +202,7 @@ class shared_vae_class(object):
 
         leftDecoderThirdLayer = Dense(
             self.params.firstLayerSizeLeft,
-            activation='relu')(decoderFirstLayerDropOut)
+            activation='relu')(decoderInputs)
         # leftDecoderThirdLayerNorm = BatchNormalization()
         #                              (leftDecoderThirdLayer)
         leftDecoderThirdLayerDropOut = Dropout(
@@ -214,7 +214,7 @@ class shared_vae_class(object):
 
         rightDecoderThirdLayer = Dense(
             self.params.firstLayerSizeRight,
-            activation='relu')(decoderFirstLayerDropOut)
+            activation='relu')(decoderInputs)
         # rightDecoderThirdLayerNorm = BatchNormalization()
         #                               (rightDecoderThirdLayer)
         rightDecoderThirdLayerDropOut = Dropout(
