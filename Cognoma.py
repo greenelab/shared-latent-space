@@ -197,10 +197,11 @@ class dataInfo(dataSetInfoAbstract):
         table_labels = dict(values=['Stat', 'PVal'])
         table = [go.Table(cells=table_data, header=table_labels)]
 
-        py.offline.plot(table, filename=os.path.join('Output',
-                                                     params.dataSetInfo.name,
-                                                     't_test_{}'.format(
-                                                      str(params.outputNum))))
+        py.offline.plot(table,
+                        filename=os.path.join('Output',
+                                              params.dataSetInfo.name,
+                                              f't_test_{str(params.outputNum)}'
+                                              ))
         #######################################################################
         # For Scatter Plot of the differentially expressed genes between
         # real TP53 wildtype vs. real TP53 mutated and
@@ -279,8 +280,7 @@ class dataInfo(dataSetInfoAbstract):
                          borderaxespad=0.,
                          fontsize=10)
         plt.savefig(os.path.join('Output', params.dataSetInfo.name,
-                                 'Scatter_{}.png'.
-                                 format(str(params.outputNum))),
+                                 f'Scatter_{str(params.outputNum)}.png'),
                     bbox_extra_artists=(lgd,),
                     bbox_inches='tight')
 
@@ -332,8 +332,8 @@ class dataInfo(dataSetInfoAbstract):
         plt.xlabel("Latent Space Nodes")
         plt.ylabel("Latent Space Percentage Difference")
         plt.savefig(os.path.join('Output', params.dataSetInfo.name,
-                                 'TP53ExpLatentSpaceComparrison_{}.png'.
-                                 format(str(params.outputNum))),
+                                 'TP53ExpLatentSpaceComparrison'
+                                 f'_{str(params.outputNum)}.png'),
                     bbox_extra_artists=(title,),
                     bbox_inches='tight')
 
@@ -364,8 +364,8 @@ class dataInfo(dataSetInfoAbstract):
                          borderaxespad=0.,
                          fontsize=10)
         plt.savefig(os.path.join('Output', params.dataSetInfo.name,
-                                 'LatentSpaceScatter_{}.png'.
-                                 format(str(params.outputNum))),
+                                 'LatentSpaceScatter'
+                                 f'_{str(params.outputNum)}.png'),
                     bbox_extra_artists=(lgd,),
                     bbox_inches='tight')
 
@@ -380,8 +380,7 @@ class dataInfo(dataSetInfoAbstract):
         plt.xlabel("Effect size of real TP53 Wildtype vs. real mutated")
         plt.ylabel("negative log 10 PVal")
         plt.savefig(os.path.join('Output', params.dataSetInfo.name,
-                                 'VolcanoReal_{}.png'.
-                                 format(str(params.outputNum))),
+                                 f'VolcanoReal_{str(params.outputNum)}.png'),
                     bbox_inches='tight')
 
         plt.figure()
@@ -392,8 +391,7 @@ class dataInfo(dataSetInfoAbstract):
         plt.xlabel("Effect size of real TP53 Wildtype vs. synthetic mutated")
         plt.ylabel("Negative log 10 PVal")
         plt.savefig(os.path.join('Output', params.dataSetInfo.name,
-                                 'VolcanoSynth_{}.png'.
-                                 format(str(params.outputNum))),
+                                 f'VolcanoSynth_{str(params.outputNum)}.png'),
                     bbox_inches='tight')
 
         plt.figure()
@@ -404,8 +402,8 @@ class dataInfo(dataSetInfoAbstract):
         plt.xlabel("Effect size of synthetic TP53 Wildtype vs. real mutated")
         plt.ylabel("Negative log 10 PVal")
         plt.savefig(os.path.join('Output', params.dataSetInfo.name,
-                                 'VolcanoSynthNot_{}.png'.
-                                 format(str(params.outputNum))),
+                                 f'VolcanoSynthNot_{str(params.outputNum)}.png'
+                                 ),
                     bbox_inches='tight')
 
         plt.figure()
@@ -417,8 +415,8 @@ class dataInfo(dataSetInfoAbstract):
                    " synthetic mutated")
         plt.ylabel("Negative log 10 PVal")
         plt.savefig(os.path.join('Output', params.dataSetInfo.name,
-                                 'VolcanoAllSynth_{}.png'.
-                                 format(str(params.outputNum))),
+                                 f'VolcanoAllSynth_{str(params.outputNum)}.png'
+                                 ),
                     bbox_inches='tight')
         plt.show()
 
@@ -446,8 +444,7 @@ class dataInfo(dataSetInfoAbstract):
             plt.scatter(umap_results[i, 0], umap_results[i, 1], label=g)
         plt.legend()
         plt.savefig(os.path.join('Output', 'Cognoma',
-                                 'LeftUMap_{}.png'.
-                                 format(str(params.outputNum))),
+                                 f'LeftUMap_{str(params.outputNum)}.png'),
                     bbox_extra_artists=(title,),
                     bbox_inches='tight')
 
@@ -465,8 +462,7 @@ class dataInfo(dataSetInfoAbstract):
             plt.scatter(umap_results[i, 0], umap_results[i, 1], label=g)
         plt.legend()
         plt.savefig(os.path.join('Output', 'Cognoma',
-                                 'RightUMap_{}.png'.
-                                 format(str(params.outputNum))),
+                                 f'RightUMap_{str(params.outputNum)}.png'),
                     bbox_extra_artists=(title,),
                     bbox_inches='tight')
 
@@ -543,8 +539,7 @@ class dataInfo(dataSetInfoAbstract):
 
         # Save visualization
         plt.savefig(os.path.join('Output', 'Cognoma',
-                                 'Visualized_{}.png'.
-                                 format(str(params.outputNum))))
+                                 f'Visualized_{str(params.outputNum)}.png'))
 
         #######################################################################
         # Create Heirical cluster maps for left and right domains comparing
@@ -602,8 +597,7 @@ class dataInfo(dataSetInfoAbstract):
         g.cax.set_visible(False)
 
         plt.savefig(os.path.join('Output', 'Cognoma',
-                                 'RightHeatmap_{}.png'.
-                                 format(str(params.outputNum))),
+                                 f'RightHeatmap_{str(params.outputNum)}.png'),
                     bbox_extra_artists=(title,),
                     bbox_inches='tight')
 
@@ -655,8 +649,7 @@ class dataInfo(dataSetInfoAbstract):
                                ' Clustermap')
 
         plt.savefig(os.path.join('Output', 'Cognoma',
-                                 'LeftHeatmap_{}.png'.
-                                 format(str(params.outputNum))),
+                                 f'LeftHeatmap_{str(params.outputNum)}.png'),
                     bbox_extra_artists=(title,),
                     bbox_inches='tight')
 

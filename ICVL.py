@@ -195,8 +195,7 @@ class dataInfo(dataSetInfoAbstract):
                 ax.set_title("Left to Right Transform")
         # save the output
         plt.savefig(os.path.join('Output', 'ICVL',
-                                 'Right_{}.png'.
-                                 format(str(params.outputNum))))
+                                 f'Right_{str(params.outputNum)}.png'))
 
         plt.figure(figsize=(120, 40))
         for i in range(n):
@@ -251,7 +250,6 @@ class dataInfo(dataSetInfoAbstract):
                 ax.set_title("Right to Left Transformed")
         # Save the Output
         plt.savefig(os.path.join('Output', 'ICVL',
-                                 'Left_{}.png'.
-                                 format(str(params.outputNum))))
+                                 f'Left_{str(params.outputNum)}.png'))
         plt.show()
         return
