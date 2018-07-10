@@ -32,7 +32,7 @@ from keras.models import Model
 from keras.layers import Dense, Activation, Lambda, Input, Dropout
 from keras.layers import BatchNormalization
 from keras.optimizers import Adam
-from keras.callbacks import EarlyStopping, Callback
+from keras.callbacks import TerminateOnNaN, Callback
 from keras.utils import plot_model
 from keras.losses import binary_crossentropy, mse
 from tensorflow import set_random_seed
@@ -267,6 +267,13 @@ class shared_vae_class(object):
                                         .format(str(self.params.outputNum))),
                    show_shapes=True)
 
+        leftOutputs = self.leftDecoder(self.leftEncoder(leftEncoderInput))
+        rightOutputs = self.rightDecoder(self.rightEncoder(rightEncoderInput))
+        self.fullModel = Model([leftEncoderInput, rightEncoderInput],
+                               [leftOutputs, rightOutputs])
+        self.fullModel.compile(
+            optimizer=adam, loss=[left_vae_loss, right_vae_loss])
+
     def train_model(self, leftDomain, rightDomain, leftDomainVal,
                     rightDomainVal, denoising):
         """
@@ -302,35 +309,27 @@ class shared_vae_class(object):
         # Set up arrays to hold the loss over training.
         left_vae_loss_data = []
         left_vae_val_loss_data = []
-        left_callback = custom_callback(
-            left_vae_loss_data, left_vae_val_loss_data)
+        left_callback = leftCallback(
+            left_vae_loss_data, left_vae_val_loss_data,
+            self.betaLeft, self.kappa)
 
         right_vae_loss_data = []
         right_vae_val_loss_data = []
-        right_callback = custom_callback(
-            right_vae_loss_data, right_vae_val_loss_data)
+        right_callback = rightCallback(
+            right_vae_loss_data, right_vae_val_loss_data,
+            self.betaRight, self.kappa)
 
-        # Train the model for n epochs
-        for i in range(self.params.numEpochs):
-            print("On EPOCH: " + repr(i + 1))
-            self.rightModel.fit(rightDomain_noisy, rightDomain,
-                                epochs=1,
-                                batch_size=self.params.batchSize,
-                                validation_data=(
-                                    rightDomainVal, rightDomainVal),
-                                callbacks=[right_callback,
-                                           WarmUpCallback(self.betaRight,
-                                                          self.kappa)])
-            self.leftModel.fit(leftDomain_noisy, leftDomain,
-                               epochs=1,
-                               batch_size=self.params.batchSize,
-                               validation_data=(leftDomainVal, leftDomainVal),
-                               callbacks=[left_callback,
-                                          WarmUpCallback(self.betaLeft,
-                                                         self.kappa)])
-            # Early stop if nan loss
-            if np.isnan(right_vae_loss_data[-1]):
-                i = self.params.numEpochs
+        self.fullModel.fit([leftDomain_noisy, rightDomain_noisy],
+                           [leftDomain, rightDomain],
+                           epochs=self.params.numEpochs,
+                           batch_size=self.params.batchSize,
+                           validation_data=([leftDomainVal,
+                                             rightDomainVal],
+                                            [leftDomainVal,
+                                             rightDomainVal]),
+                           callbacks=[left_callback,
+                                      right_callback,
+                                      TerminateOnNaN()])
 
         # Make graph of the training and validation loss
         sns.set_style("darkgrid")
@@ -356,8 +355,8 @@ class shared_vae_class(object):
         plt.ylabel("Loss")
         output_df.plot(style='--', ax=ax)
         plt.savefig(os.path.join('Output', self.params.dataSetInfo.name,
-                                 'Loss_{}.png'.
-                                 format(str(self.params.outputNum))))
+                                 f'Loss_{str(self.params.outputNum)}.png'
+                                 ))
 
         # Creeate a table with the model parameters
         table_data = dict(values=[[str(self.params.numEpochs)],
@@ -386,9 +385,7 @@ class shared_vae_class(object):
         py.offline.plot(table,
                         filename=os.path.join('Output',
                                               self.params.dataSetInfo.name,
-                                              '{}'.format(str(self.
-                                                              params.outputNum)
-                                                          )))
+                                              f'{str(self.params.outputNum)}'))
 
     def generate(self, leftDomain, rightDomain):
         """
@@ -498,26 +495,36 @@ class shared_vae_class(object):
               repr(np.sum(rightCycleDifferenceNoise) / leftDomain.shape[0]))
 
 
-class custom_callback(Callback):
+class leftCallback(Callback):
     # For logging the loss throughout training
 
-    def __init__(self, loss_data, val_loss):
+    def __init__(self, loss_data, val_loss, beta, kappa):
         self.loss_data = loss_data
         self.val_loss = val_loss
-
-    def on_epoch_end(self, epoch, logs={}):
-        self.loss_data.append(logs.get('loss'))
-        self.val_loss.append(logs.get('val_loss'))
-
-
-class WarmUpCallback(Callback):
-
-    def __init__(self, beta, kappa):
         self.beta = beta
         self.kappa = kappa
 
-    # Behavior on each epoch, for warm start
     def on_epoch_end(self, epoch, logs={}):
+        self.loss_data.append(logs.get('model_4_loss'))
+        self.val_loss.append(logs.get('val_model_4_loss'))
+        if K.get_value(self.beta) < 1:
+            K.set_value(self.beta, K.get_value(self.beta) + self.kappa)
+        else:
+            K.set_value(self.beta, 1)
+
+
+class rightCallback(Callback):
+    # For logging the loss throughout training
+
+    def __init__(self, loss_data, val_loss, beta, kappa):
+        self.loss_data = loss_data
+        self.val_loss = val_loss
+        self.beta = beta
+        self.kappa = kappa
+
+    def on_epoch_end(self, epoch, logs={}):
+        self.loss_data.append(logs.get('model_5_loss'))
+        self.val_loss.append(logs.get('val_model_5_loss'))
         if K.get_value(self.beta) < 1:
             K.set_value(self.beta, K.get_value(self.beta) + self.kappa)
         else:
