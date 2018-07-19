@@ -357,34 +357,31 @@ class shared_vae_class(object):
                                  f'Loss_{str(self.params.outputNum)}.png'
                                  ))
 
-        # Creeate a table with the model parameters
-        table_data = dict(values=[[str(self.params.numEpochs)],
-                                  [str(self.params.firstLayerSizeLeft)],
-                                  [str(self.params.inputSizeLeft)],
-                                  # [str(self.params.secondLayerSize)],
-                                  # [str(self.params.thirdLayerSize)],
-                                  [str(self.params.encodedSize)],
-                                  [str(self.params.firstLayerSizeRight)],
-                                  [str(self.params.inputSizeRight)],
-                                  [str(self.params.kappa)],
-                                  [str(self.params.beta)],
-                                  [str(self.params.noise)],
-                                  [self.params.notes]])
-        table_labels = dict(values=['Epochs', 'First Layer Left',
-                                    'Input Size Left',
-                                    # 'Second Layer',
-                                    # 'Third Layer',
-                                    'Encoded Size',
-                                    'First Layer Right',
-                                    'inputSizeRight', 'Kappa',
-                                    'Intial Beta Value',
-                                    'Noise level', 'notes'])
-        table = [go.Table(cells=table_data, header=table_labels)]
+        t_test_df = pd.DataFrame([str(self.params.numEpochs),
+                                  str(self.params.firstLayerSizeLeft),
+                                  str(self.params.inputSizeLeft),
+                                  # str(self.params.secondLayerSize),
+                                  # str(self.params.thirdLayerSize),
+                                  str(self.params.encodedSize),
+                                  str(self.params.firstLayerSizeRight),
+                                  str(self.params.inputSizeRight),
+                                  str(self.params.kappa),
+                                  str(self.params.beta),
+                                  str(self.params.noise),
+                                  self.params.notes],
+                                 index=['Epochs', 'First Layer Left',
+                                        'Input Size Left',
+                                        # 'Second Layer',
+                                        # 'Third Layer',
+                                        'Encoded Size',
+                                        'First Layer Right',
+                                        'inputSizeRight', 'Kappa',
+                                        'Intial Beta Value',
+                                        'Noise level', 'notes']).transpose()
 
-        py.offline.plot(table,
-                        filename=os.path.join('Output',
-                                              self.params.dataSetInfo.name,
-                                              f'{str(self.params.outputNum)}'))
+        file = os.path.join('Output', self.params.dataSetInfo.name,
+                            f'{str(self.params.outputNum)}')
+        t_test_df.to_csv(file, sep='\t')
 
     def generate(self, leftDomain, rightDomain):
         """

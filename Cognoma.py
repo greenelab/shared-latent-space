@@ -23,10 +23,9 @@ import pandas as pd
 import plotly as py
 import umap as up
 import plotly.graph_objs as go
-import sklearn as sk
 import scipy
 from scipy import misc
-from sklearn import preprocessing
+from sklearn import utils, metrics, model_selection
 from six.moves import cPickle
 
 # Local files
@@ -74,15 +73,17 @@ class dataInfo(dataSetInfoAbstract):
 
         # a_temp = preprocessing.normalize(a_temp, norm='l2')
 
-        x_temp, a_temp = sk.utils.shuffle(x_temp, a_temp)
+        x_temp, a_temp = utils.shuffle(x_temp, a_temp)
 
         length = x_temp.shape[0]
 
-        x_train = x_temp[:int(length * .9)]
-        x_test = x_temp[int(length * .9):]
+        x_train, x_test = model_selection.train_test_split(x_temp,
+                                                           test_size=.1,
+                                                           shuffle=False)
 
-        a_train = a_temp[:int(length * .9)]
-        a_test = a_temp[int(length * .9):]
+        a_train, a_test = model_selection.train_test_split(a_temp,
+                                                           test_size=.1,
+                                                           shuffle=False)
         return (x_train, a_train, x_test, a_test)
 
     def visualize(self, modelHandle,
@@ -168,8 +169,8 @@ class dataInfo(dataSetInfoAbstract):
                                                               SNPpresent)
 
         # Find the Mean Squared Error
-        SNPpresentToExpMSE = np.square(np.subtract(
-            SNPpresentExp, SNPpresentToExp)).mean(axis=0)
+        SNPpresentToExpMSE = metrics.mean_squared_error(SNPpresentExp,
+                                                        SNPpresentToExp)
 
         # Create arrays for induced samples
         InducedMutation = copy.copy(SNPpresent)
@@ -183,8 +184,8 @@ class dataInfo(dataSetInfoAbstract):
                                                              InducedMutation)
 
         # Find the Mean Squared Error
-        InducedMutationToExpMSE = np.square(np.subtract(
-            InducedMutationExp, InducedMutationToExp)).mean(axis=0)
+        InducedMutationToExpMSE = metrics.mean_squared_error(
+            InducedMutationExp, InducedMutationToExp)
 
         # Run a t test on the MSE's
         ttest_results = scipy.stats.ttest_ind(
@@ -193,15 +194,12 @@ class dataInfo(dataSetInfoAbstract):
         p_val = ttest_results.pvalue
 
         # Print a table with the t test results
-        table_data = dict(values=[[t_stat], [p_val]])
-        table_labels = dict(values=['Stat', 'PVal'])
-        table = [go.Table(cells=table_data, header=table_labels)]
+        t_test_df = pd.DataFrame([t_stat, p_val],
+                                 index=['t_stat', 'p_val']).transpose()
 
-        py.offline.plot(table,
-                        filename=os.path.join('Output',
-                                              params.dataSetInfo.name,
-                                              f't_test_{str(params.outputNum)}'
-                                              ))
+        file = os.path.join('Output', params.dataSetInfo.name,
+                            f't_test_{str(params.outputNum)}')
+        t_test_df.to_csv(file, sep='\t')
         #######################################################################
         # For Scatter Plot of the differentially expressed genes between
         # real TP53 wildtype vs. real TP53 mutated and
