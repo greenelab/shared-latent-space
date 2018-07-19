@@ -154,26 +154,25 @@ class shared_vae_class(object):
         rightEncoderSecondLayerDropOut = Dropout(
             self.params.dropout)(rightEncoderSecondLayerNorm)
         '''
-        '''
-        encoderMergeLayer = Dense(
-            self.params.thirdLayerSize, activation='relu')
-        leftMerge = encoderMergeLayer(leftEncoderInput)
-        leftMergeNorm = BatchNormalization()(leftMerge)
-        leftMergeDropOut = Dropout(self.params.dropout)(leftMergeNorm)
-        rightMerge = encoderMergeLayer(rightEncoderInput)
-        rightMergeNorm = BatchNormalization()(rightMerge)
-        rightMergeDropOut = Dropout(self.params.dropout)(rightMergeNorm)
-        '''
 
+        sharedEncoderLayer = Dense(
+                self.params.thirdLayerSize, activation='relu')
+        leftShared = sharedEncoderLayer(leftEncoderFirstLayerDropOut)
+        # leftSharedNorm = BatchNormalization()(leftShared)
+        leftSharedDropOut = Dropout(self.params.dropout)(leftShared)
+        rightShared = sharedEncoderLayer(rightEncoderFirstLayerDropOut)
+        # rightSharedNorm = BatchNormalization()(rightShared)
+        rightSharedDropOut = Dropout(self.params.dropout)(rightShared)
+        
         z_mean = Dense(self.params.encodedSize)
         z_log_sigma = Dense(self.params.encodedSize)
 
-        # These three sets are used in differen models
-        z_meanLeft = z_mean(leftEncoderFirstLayerDropOut)
-        z_log_sigmaLeft = z_log_sigma(leftEncoderFirstLayerDropOut)
+        # These two sets are used in differen models
+        z_meanLeft = z_mean(leftSharedDropOut)
+        z_log_sigmaLeft = z_log_sigma(leftSharedDropOut)
 
-        z_meanRight = z_mean(rightEncoderFirstLayerDropOut)
-        z_log_sigmaRight = z_log_sigma(rightEncoderFirstLayerDropOut)
+        z_meanRight = z_mean(rightSharedDropOut)
+        z_log_sigmaRight = z_log_sigma(rightSharedDropOut)
 
         zLeft = Lambda(sampling)([z_meanLeft, z_log_sigmaLeft])
         zRight = Lambda(sampling)([z_meanRight, z_log_sigmaRight])
@@ -184,13 +183,13 @@ class shared_vae_class(object):
 
         # Defining the Decoder with Left and Right Outputs
         decoderInputs = Input(shape=(self.params.encodedSize,))
-        '''decoderFirstLayer = Dense(
-            self.params.thirdLayerSize,
+        decoderFirstLayer = Dense(
+            self.params.firstLayerSizeLeft,
             activation='relu')(decoderInputs)
         decoderFirstLayerNorm = BatchNormalization()(decoderFirstLayer)
         decoderFirstLayerDropOut = Dropout(
             self.params.dropout)(decoderFirstLayerNorm)
-        '''
+
         '''
         decoderSecondLayer = Dense(
             self.params.secondLayerSize,
@@ -200,27 +199,27 @@ class shared_vae_class(object):
             self.params.dropout)(decoderSecondLayerNorm)
         '''
 
-        leftDecoderThirdLayer = Dense(
+        '''leftDecoderThirdLayer = Dense(
             self.params.firstLayerSizeLeft,
             activation='relu')(decoderInputs)
         # leftDecoderThirdLayerNorm = BatchNormalization()
         #                              (leftDecoderThirdLayer)
         leftDecoderThirdLayerDropOut = Dropout(
-            self.params.dropout)(leftDecoderThirdLayer)
+            self.params.dropout)(leftDecoderThirdLayer)'''
         leftDecoderFinal = Dense(
-            self.params.inputSizeLeft)(leftDecoderThirdLayerDropOut)
+            self.params.inputSizeLeft)(decoderFirstLayerDropOut)
         # leftDecoderOutputNorm = BatchNormalization()(leftDecoderFinal)
         leftDecoderOutput = Activation('sigmoid')(leftDecoderFinal)
 
-        rightDecoderThirdLayer = Dense(
+        '''rightDecoderThirdLayer = Dense(
             self.params.firstLayerSizeRight,
             activation='relu')(decoderInputs)
         # rightDecoderThirdLayerNorm = BatchNormalization()
         #                               (rightDecoderThirdLayer)
         rightDecoderThirdLayerDropOut = Dropout(
-            self.params.dropout)(rightDecoderThirdLayer)
+            self.params.dropout)(rightDecoderThirdLayer)'''
         rightDecoderFinal = Dense(
-            self.params.inputSizeRight)(rightDecoderThirdLayerDropOut)
+            self.params.inputSizeRight)(decoderFirstLayerDropOut)
         # rightDecoderOutputNorm = BatchNormalization()(rightDecoderFinal)
         rightDecoderOutput = Activation('sigmoid')(rightDecoderFinal)
 

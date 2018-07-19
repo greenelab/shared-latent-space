@@ -46,9 +46,9 @@ class dataInfo(dataSetInfoAbstract):
         """
         self.name = "Cognoma"
         self.training_file = os.path.join('Data', 'Cognoma_Data', 'Training',
-                                          'Cognoma_Training_Large.pkl')
-        self.rightXDim = 45
-        self.rightYDim = 123
+                                          'Cognoma_Training_Gene_Norm.pkl')
+        self.rightXDim = 36
+        self.rightYDim = 40
         self.leftXDim = 100
         self.leftYDim = 80
         self.rightDomainName = "Mutation"
@@ -207,7 +207,7 @@ class dataInfo(dataSetInfoAbstract):
         # real TP53 wildtype vs. real TP53 mutated and
         # real vs. synthetic TP53 data
 
-        # Induce wiltype TP53
+        # Induce wildtype TP53
         InducedSNPpresent = copy.copy(SNPabsent)
         InducedSNPpresent[:, self.mutationID] = 0
 
@@ -286,7 +286,7 @@ class dataInfo(dataSetInfoAbstract):
 
         #######################################################################
         # For creating bar graphs of latent space expression between
-        # TP53 Wiltype and TP53 mutated
+        # TP53 Wildtype and TP53 mutated
 
         # Find the difference in the nodes between TP53 wildtyupe and mutated
         # in the right model

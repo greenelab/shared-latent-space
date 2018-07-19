@@ -38,6 +38,7 @@ import numpy as np
 import ICVL
 import MNIST
 import Cognoma
+import SVHN
 
 from unpack_files import unpackFiles
 from shared_vae_class import shared_vae_class
@@ -81,7 +82,8 @@ args = get_args()
 data_dict = {
         'MNIST': MNIST.dataInfo(),
         'ICVL': ICVL.dataInfo(),
-        'Cognoma': Cognoma.dataInfo()
+        'Cognoma': Cognoma.dataInfo(),
+        'SVHN': SVHN.dataInfo()
 }
 
 

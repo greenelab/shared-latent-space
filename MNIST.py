@@ -39,8 +39,8 @@ class dataInfo(dataSetInfoAbstract):
         Returns: None
         """
         self.name = "MNIST"
-        self.training_file = os.path.join('Data', 'MNIST_Data', 'Testing',
-                                          'MNIST_Testing.pkl')
+        self.training_file = os.path.join('Data', 'MNIST_Data', 'Training',
+                                          'MNIST_Training.pkl')
         self.testing_file = os.path.join('Data', 'MNIST_Data', 'Testing',
                                          'MNIST_Testing.pkl')
         self.Xdim = 28
