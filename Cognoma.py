@@ -46,15 +46,15 @@ class dataInfo(dataSetInfoAbstract):
         self.name = "Cognoma"
         self.training_file = os.path.join('Data', 'Cognoma_Data', 'Training',
                                           'Cognoma_Training_Gene_Norm.pkl')
-        self.rightXDim = 36
-        self.rightYDim = 40
+        self.rightXDim = 2767
+        self.rightYDim = 2
         self.leftXDim = 100
         self.leftYDim = 80
         self.rightDomainName = "Mutation"
         self.leftDomainName = "Expression"
 
         # For Cognoma evaluation, which mutation to induce and compare
-        self.mutationID = 485
+        self.entrezID = 7157
 
     def load(self):
         """
@@ -73,7 +73,10 @@ class dataInfo(dataSetInfoAbstract):
 
         # a_temp = preprocessing.normalize(a_temp, norm='l2')
 
-        x_temp, a_temp = utils.shuffle(x_temp, a_temp)
+        self.mutationID = a_temp.columns.get_loc(7157)
+        print(self.mutationID)
+
+        x_temp, a_temp = utils.shuffle(x_temp.values, a_temp.values)
 
         length = x_temp.shape[0]
 
@@ -92,7 +95,7 @@ class dataInfo(dataSetInfoAbstract):
                   rightToLeftCycle,
                   right_generatedImgs, leftToRightImgs,
                   leftDomain, left_decoded_imgs, leftToRightCycle,
-                  left_generatedImgs, rightToLeftImgs, params, n=100):
+                  left_generatedImgs, rightToLeftImgs, params, num_rand=100):
         """
         Visualizes all of the data passed to it.
 
@@ -123,7 +126,7 @@ class dataInfo(dataSetInfoAbstract):
             rightToLeftImgs (array of floats): Right input encoded and decoded
                                                as left.
             params (model_parameters): Parameters of the model.
-            n (int): Defaults to 100
+            num_rand (int): Defaults to 100
 
         Returns: None
         """
@@ -153,7 +156,7 @@ class dataInfo(dataSetInfoAbstract):
         # Pick a random grouping of these examples
         randIndexes = np.random.randint(
             0, min(SNPpresent.shape[0], SNPabsent.shape[0]) - 1,
-            (n,))
+            (num_rand,))
         SNPpresent = SNPpresent[1:]
         SNPpresentExp = SNPpresentExp[1:]
         SNPpresent = SNPpresent[randIndexes]
@@ -213,8 +216,8 @@ class dataInfo(dataSetInfoAbstract):
                                                             InducedSNPpresent)
 
         # Create y points for the linear regressions
-        xPoints = np.repeat(0, n)
-        xPoints = np.append(xPoints, np.repeat(1, n))
+        xPoints = np.repeat(0, num_rand)
+        xPoints = np.append(xPoints, np.repeat(1, num_rand))
 
         # Perform t-tests for all four situations of real and synthetic data
         SyntheticEffect = np.array([])
@@ -346,7 +349,7 @@ class dataInfo(dataSetInfoAbstract):
 
         # Make a scatter plot of the average present and absent values per node
         plt.figure()
-        plt.title("Scatter Plot of the latent space expression of wiltype vs."
+        plt.title("Scatter Plot of the latent space values of wiltype vs."
                   "mutated")
         plt.scatter(SNPabsentLatentMean, SNPpresentLatentMean, c='r',
                     alpha=0.2,
@@ -354,8 +357,8 @@ class dataInfo(dataSetInfoAbstract):
         plt.scatter(SNPabsentExpLatentMean, SNPpresentExpLatentMean, c='b',
                     alpha=0.2,
                     label="Expression latent space")
-        plt.ylabel("Latent space expression of wiltype")
-        plt.xlabel("Latent space expression of mutated")
+        plt.ylabel("Latent space values of wiltype")
+        plt.xlabel("Latent space values of mutated")
         lgd = plt.legend(ncol=1,
                          bbox_to_anchor=(1.03, 1),
                          loc=2,
@@ -431,7 +434,7 @@ class dataInfo(dataSetInfoAbstract):
         umap = up.UMAP(n_neighbors=5,
                        min_dist=0.1,
                        metric='correlation')
-        randIndexes = np.random.randint(0, leftDomain.shape[0], (n,))
+        randIndexes = np.random.randint(0, leftDomain.shape[0], (num_rand,))
         umap_results = umap.fit_transform(leftPredicted[randIndexes, :])
 
         plt.figure()
@@ -450,7 +453,7 @@ class dataInfo(dataSetInfoAbstract):
         umap = up.UMAP(n_neighbors=5,
                        min_dist=0.1,
                        metric='correlation')
-        randIndexes = np.random.randint(0, rightDomain.shape[0], (n,))
+        randIndexes = np.random.randint(0, rightDomain.shape[0], (num_rand,))
         umap_results = umap.fit_transform(rightPredicted[randIndexes, :])
 
         plt.figure()
@@ -544,7 +547,7 @@ class dataInfo(dataSetInfoAbstract):
         # real, reconstructed, and transformed data
 
         # Make matrix of data for cluster map for the Right Domain
-        num_examples = n
+        num_examples = num_rand
         random = np.random.randint(0, num_examples,
                                    size=num_examples)
         X = np.append(rightDomain[random, :],

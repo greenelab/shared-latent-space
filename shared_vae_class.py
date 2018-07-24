@@ -241,7 +241,7 @@ class shared_vae_class(object):
         # rightToLeftModel.summary()
 
         # Define custom learn rate
-        adam = Adam(lr=.0001)
+        adam = Adam(lr=.00001)
 
         # Define the left and right models
         outputs = self.leftDecoder(self.leftEncoder(leftEncoderInput))
