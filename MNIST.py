@@ -14,38 +14,39 @@ Date: 5/22/18
 """
 
 import os
-import cPickle
+import pickle
 
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
 from scipy import misc
-from keras.datasets import mnist
+from six.moves import cPickle
 
 # Local Files
 from model_objects import model_parameters
 from DataSetInfoAbstractClass import dataSetInfoAbstract
-import cPickle
 
 
 class dataInfo(dataSetInfoAbstract):
 
     def __init__(self):
         """
-        Defines the object's name and image size
+        Defines the object's name, file locations, image size and domain names
 
         Args: None
 
         Returns: None
         """
         self.name = "MNIST"
-        self.training_file = os.path.join('Data', 'MNIST_Data', 'Testing',
-                                          'MNIST_Testing.pkl')
+        self.training_file = os.path.join('Data', 'MNIST_Data', 'Training',
+                                          'MNIST_Training.pkl')
         self.testing_file = os.path.join('Data', 'MNIST_Data', 'Testing',
                                          'MNIST_Testing.pkl')
         self.Xdim = 28
         self.Ydim = 28
+        self.rightDomainName = "White Backed"
+        self.leftDomainName = "Black Backed"
 
     def load(self):
         """
@@ -60,12 +61,14 @@ class dataInfo(dataSetInfoAbstract):
 
         # Loading the MNIST Data
         with open(self.training_file, "rb") as fp:
-            (x_train, a_train) = cPickle.load(fp)
+            (x_train, a_train) = pickle.load(fp, encoding='latin1')
         with open(self.testing_file, "rb") as fp:
-            (x_test, a_test) = cPickle.load(fp)
+            (x_test, a_test) = pickle.load(fp, encoding='latin1')
         return (x_train, a_train, x_test, a_test)
 
-    def visualize(self, randIndexes, rightDomain, right_decoded_imgs,
+    def visualize(self, modelHandle,
+                  leftPredicted, rightPredicted, rightDomain,
+                  right_decoded_imgs,
                   rightToLeftCycle, right_generatedImgs, leftToRightImgs,
                   leftDomain, left_decoded_imgs, leftToRightCycle,
                   left_generatedImgs, rightToLeftImgs, params, n=10):
@@ -73,8 +76,9 @@ class dataInfo(dataSetInfoAbstract):
         Visualizes all of the data passed to it.
 
         Args:
-            randIndexes (array of ints): Random points to portray,
-                                         but same for each set of data
+            modelHandle (model): Holds all the components of the model
+            leftPredicted (array of floats): The latent space predictions
+            rightPredicted (array of floats): The latent space predictions
             rightDomain (array of floats): Right input.
             right_decoded_imgs (array of floats): Right input
                                                   encoded and decoded.
@@ -98,14 +102,15 @@ class dataInfo(dataSetInfoAbstract):
             rightToLeftImgs (array of floats): Right input encoded and decoded
                                                as left.
             params (model_parameters): Parameters of the model.
-            n (int): Defaults to 10, number of visualizations.
+            n (int): Defaults to 10
 
         Returns: None
         """
+        randIndexes = np.random.randint(0, rightDomain.shape[0], (n,))
 
         # Display the Original, Reconstructed, Transformed, Cycle, and
         # Generated data for both the regular and invserve MNIST data
-        plt.figure()
+        plt.figure(figsize=(20,10))
         for i in range(n):
             # display reg original
             ax = plt.subplot(12, n, i + 1)
@@ -207,15 +212,13 @@ class dataInfo(dataSetInfoAbstract):
             ax.get_yaxis().set_visible(False)
             if (i == 0):
                 ax.set_title("Right Generated")
+
+        #plt.tight_layout()
+        plt.subplots_adjust(hspace=.88)
+
         plt.savefig(os.path.join('Output', 'MNIST',
-                                 'Output_{}_{}_{}_{}_{}_{}_{}_{}.png'.
-                                 format(str(params.numEpochs),
-                                        str(params.firstLayerSizeLeft),
-                                        str(params.inputSizeLeft),
-                                        str(params.secondLayerSize),
-                                        str(params.thirdLayerSize),
-                                        str(params.encodedSize),
-                                        str(params.firstLayerSizeRight),
-                                        str(params.inputSizeRight))))
+                                 'Output_{}.png'.
+                                 format(str(params.outputNum))),
+                    bbox_inches='tight')
         plt.show()
         return

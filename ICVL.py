@@ -14,23 +14,23 @@ Date: 5/22/18
 """
 
 import os
-import cPickle
+import pickle
 
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+from six.moves import cPickle
 
 # Local files
 from model_objects import model_parameters
 from DataSetInfoAbstractClass import dataSetInfoAbstract
-import cPickle
 
 
 class dataInfo(dataSetInfoAbstract):
 
     def __init__(self):
         """
-        Defines the object's name, file locations and image size
+        Defines the object's name, file locations, image size, and domain names
 
         Args: None
 
@@ -43,6 +43,8 @@ class dataInfo(dataSetInfoAbstract):
                                          'ICVL_Testing.pkl')
         self.Xdim = 60
         self.Ydim = 80
+        self.rightDomainName = "Joints"
+        self.leftDomainName = "Depth Map"
 
     def load(self):
         """
@@ -56,10 +58,18 @@ class dataInfo(dataSetInfoAbstract):
         """
 
         with open(self.training_file, "rb") as fp:
-            (x_train, a_train) = cPickle.load(fp)
+            (x_temp, a_temp) = pickle.load(fp, encoding='latin1')
 
-        with open(self.testing_file, "rb") as fp:
-            (x_test, a_test) = cPickle.load(fp)
+        np.random.shuffle(x_temp)
+        np.random.shuffle(a_temp)
+
+        length = x_temp.shape[0]
+
+        x_train = x_temp[:int(length * .9)]
+        x_test = x_temp[int(length * .9):]
+
+        a_train = a_temp[:int(length * .9)]
+        a_test = a_temp[int(length * .9):]
         return (x_train, a_train, x_test, a_test)
 
     # This file plots the lines for the various fingers. This is all hardcoded
@@ -93,7 +103,9 @@ class dataInfo(dataSetInfoAbstract):
             linesEnd = np.array([Ys[i], Ys[j]])
             plt.plot(linesStart, linesEnd, c)
 
-    def visualize(self, randIndexes, rightDomain, right_decoded_imgs,
+    def visualize(self, modelHandle,
+                  leftPredicted, rightPredicted, rightDomain,
+                  right_decoded_imgs,
                   rightToLeftCycle,
                   right_generatedImgs, leftToRightImgs,
                   leftDomain, left_decoded_imgs, leftToRightCycle,
@@ -102,8 +114,9 @@ class dataInfo(dataSetInfoAbstract):
         Visualizes all of the data passed to it.
 
         Args:
-            randIndexes (array of ints): Random points to portray,
-                                         but same for each set of data
+            modelHandle (model): Holds all the components of the model
+            leftPredicted (array of floats): The latent space predictions
+            rightPredicted (array of floats): The latent space predictions
             rightDomain (array of floats): Right input.
             right_decoded_imgs (array of floats): Right input
                                                   encoded and decoded.
@@ -127,10 +140,11 @@ class dataInfo(dataSetInfoAbstract):
             rightToLeftImgs (array of floats): Right input encoded and decoded
                                                as left.
             params (model_parameters): Parameters of the model.
-            n (int): Defaults to 10, number of visualizations.
+            n (int): Defaults to 10
 
         Returns: None
         """
+        randIndexes = np.random.randint(0, rightDomain.shape[0], (n,))
 
         plt.figure(figsize=(120, 40))
         for i in range(n):
@@ -181,15 +195,7 @@ class dataInfo(dataSetInfoAbstract):
                 ax.set_title("Left to Right Transform")
         # save the output
         plt.savefig(os.path.join('Output', 'ICVL',
-                                 'Right_{}_{}_{}_{}_{}_{}_{}_{}.png'.
-                                 format(str(params.numEpochs),
-                                        str(params.firstLayerSizeLeft),
-                                        str(params.inputSizeLeft),
-                                        str(params.secondLayerSize),
-                                        str(params.thirdLayerSize),
-                                        str(params.encodedSize),
-                                        str(params.firstLayerSizeRight),
-                                        str(params.inputSizeRight))))
+                                 f'Right_{str(params.outputNum)}.png'))
 
         plt.figure(figsize=(120, 40))
         for i in range(n):
@@ -244,14 +250,6 @@ class dataInfo(dataSetInfoAbstract):
                 ax.set_title("Right to Left Transformed")
         # Save the Output
         plt.savefig(os.path.join('Output', 'ICVL',
-                                 'Left_{}_{}_{}_{}_{}_{}_{}_{}.png'.
-                                 format(str(params.numEpochs),
-                                        str(params.firstLayerSizeLeft),
-                                        str(params.inputSizeLeft),
-                                        str(params.secondLayerSize),
-                                        str(params.thirdLayerSize),
-                                        str(params.encodedSize),
-                                        str(params.firstLayerSizeRight),
-                                        str(params.inputSizeRight))))
+                                 f'Left_{str(params.outputNum)}.png'))
         plt.show()
         return
