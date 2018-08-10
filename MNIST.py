@@ -61,9 +61,9 @@ class dataInfo(dataSetInfoAbstract):
 
         # Loading the MNIST Data
         with open(self.training_file, "rb") as fp:
-            (x_train, a_train) = pickle.load(fp)
+            (x_train, a_train) = pickle.load(fp, encoding='latin1')
         with open(self.testing_file, "rb") as fp:
-            (x_test, a_test) = pickle.load(fp)
+            (x_test, a_test) = pickle.load(fp, encoding='latin1')
         return (x_train, a_train, x_test, a_test)
 
     def visualize(self, modelHandle,
@@ -110,7 +110,7 @@ class dataInfo(dataSetInfoAbstract):
 
         # Display the Original, Reconstructed, Transformed, Cycle, and
         # Generated data for both the regular and invserve MNIST data
-        plt.figure()
+        plt.figure(figsize=(20,10))
         for i in range(n):
             # display reg original
             ax = plt.subplot(12, n, i + 1)
@@ -212,8 +212,13 @@ class dataInfo(dataSetInfoAbstract):
             ax.get_yaxis().set_visible(False)
             if (i == 0):
                 ax.set_title("Right Generated")
+
+        #plt.tight_layout()
+        plt.subplots_adjust(hspace=.88)
+
         plt.savefig(os.path.join('Output', 'MNIST',
                                  'Output_{}.png'.
-                                 format(str(params.outputNum))))
+                                 format(str(params.outputNum))),
+                    bbox_inches='tight')
         plt.show()
         return

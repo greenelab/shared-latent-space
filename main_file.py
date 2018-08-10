@@ -123,7 +123,7 @@ model_parameters = model_parameters(
 
 # Calculate which number run it is, so then the output will have a unique name
 while os.path.exists(os.path.join('Output', dataSetInfo.name,
-                                  f"{model_parameters.outputNum}.html".format()
+                                  f"{model_parameters.outputNum}".format()
                                   )):
     model_parameters.outputNum += 1
 

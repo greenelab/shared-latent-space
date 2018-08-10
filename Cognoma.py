@@ -46,8 +46,8 @@ class dataInfo(dataSetInfoAbstract):
         self.name = "Cognoma"
         self.training_file = os.path.join('Data', 'Cognoma_Data', 'Training',
                                           'Cognoma_Training_Gene_Norm.pkl')
-        self.rightXDim = 2767
-        self.rightYDim = 2
+        self.rightXDim = 43
+        self.rightYDim = 61
         self.leftXDim = 100
         self.leftYDim = 80
         self.rightDomainName = "Mutation"
@@ -219,7 +219,7 @@ class dataInfo(dataSetInfoAbstract):
         xPoints = np.repeat(0, num_rand)
         xPoints = np.append(xPoints, np.repeat(1, num_rand))
 
-        # Perform t-tests for all four situations of real and synthetic data
+        # Perform regression for all four situations of real and synthetic data
         SyntheticEffect = np.array([])
         SyntheticPVal = np.array([])
         for x in range(leftDomain.shape[1]):
@@ -339,7 +339,7 @@ class dataInfo(dataSetInfoAbstract):
                     bbox_inches='tight')
 
         #######################################################################
-        # Make a latent space of percentage difference between the latente
+        # Make a latent space of percentage difference between the latent
         # space nodes between the wildtype and mutated
 
         SNPpresentLatentMean = SNPpresentLatent.mean(axis=0)

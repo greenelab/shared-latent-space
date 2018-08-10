@@ -58,7 +58,7 @@ class dataInfo(dataSetInfoAbstract):
         """
 
         with open(self.training_file, "rb") as fp:
-            (x_temp, a_temp) = pickle.load(fp)
+            (x_temp, a_temp) = pickle.load(fp, encoding='latin1')
 
         np.random.shuffle(x_temp)
         np.random.shuffle(a_temp)
