@@ -27,6 +27,7 @@ from keras.datasets import mnist
 from model_objects import model_parameters
 from DataSetInfoAbstractClass import dataSetInfoAbstract
 import cPickle
+import gzip
 
 
 class dataInfo(dataSetInfoAbstract):
@@ -59,10 +60,14 @@ class dataInfo(dataSetInfoAbstract):
         """
 
         # Loading the MNIST Data
-        with open(self.training_file, "rb") as fp:
-            (x_train, a_train) = cPickle.load(fp)
-        with open(self.testing_file, "rb") as fp:
-            (x_test, a_test) = cPickle.load(fp)
+        # with open(self.training_file, "rb") as fp:
+        #     (x_train, a_train) = cPickle.load(fp)
+        # with open(self.testing_file, "rb") as fp:
+        #     (x_test, a_test) = cPickle.load(fp)
+        f = gzip.open('mnist.pkl.gz', 'rb')
+        train, val, test = cPickle.load(f)
+        x_train, a_train = train
+        x_test, a_test = test
         return (x_train, a_train, x_test, a_test)
 
     def visualize(self, randIndexes, rightDomain, right_decoded_imgs,
