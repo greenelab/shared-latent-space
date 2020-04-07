@@ -22,14 +22,14 @@ import os
 
 import numpy as np
 import matplotlib.pyplot as plt
-import keras
+import tensorflow.keras as keras
 
-from keras.models import Model
-from keras.layers import Dense, Activation, Lambda, Input
-from keras.optimizers import Adam
-from keras import backend as K
-from keras.callbacks import EarlyStopping
-from keras.utils import plot_model
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dense, Activation, Lambda, Input
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras import backend as K
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.utils import plot_model
 
 # Local files
 import ICVL
