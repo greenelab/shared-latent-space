@@ -13,9 +13,7 @@ Date: 5/22/18
 from abc import ABCMeta, abstractmethod
 
 
-class dataSetInfoAbstract(object):
-    __metaclass__ = ABCMeta
-
+class dataSetInfoAbstract(object, metaclass=ABCMeta):
     @abstractmethod
     def load(self):
         """
