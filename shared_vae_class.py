@@ -347,7 +347,7 @@ class shared_vae_class(object):
 
         # Take turns training each part of the model separately
         for i in range(self.params.numEpochs):
-            print("On EPOCH: " + repr(i + 1))
+            print(("On EPOCH: " + repr(i + 1)))
             self.centerModel.fit([leftDomain_noisy, rightDomain_noisy],
                                  [leftDomain, rightDomain],
                                  epochs=1,
@@ -415,10 +415,10 @@ class shared_vae_class(object):
                                 - np.absolute(rightToLeftCycle))
 
         # Print Average Cycle Differences
-        print("Left Cycle Difference: " +
-              repr(np.sum(leftCycleDifference) / leftDomain.shape[0]))
-        print("Right Cycle Difference: " +
-              repr(np.sum(rightCycleDifference) / leftDomain.shape[0]))
+        print(("Left Cycle Difference: " +
+              repr(np.sum(leftCycleDifference) / leftDomain.shape[0])))
+        print(("Right Cycle Difference: " +
+              repr(np.sum(rightCycleDifference) / leftDomain.shape[0])))
 
         # Create Noise
         leftRandomNoise = np.random.normal(
@@ -447,7 +447,7 @@ class shared_vae_class(object):
         rightCycleDifferenceNoise = (np.absolute(right_decoded_imgs_noise)
                                      - np.absolute(rightToLeftCycleNoise))
 
-        print("Left Cycle Noise Difference: " +
-              repr(np.sum(leftCycleDifferenceNoise) / leftDomain.shape[0]))
-        print("Right Cycle Noise Difference: " +
-              repr(np.sum(rightCycleDifferenceNoise) / leftDomain.shape[0]))
+        print(("Left Cycle Noise Difference: " +
+              repr(np.sum(leftCycleDifferenceNoise) / leftDomain.shape[0])))
+        print(("Right Cycle Noise Difference: " +
+              repr(np.sum(rightCycleDifferenceNoise) / leftDomain.shape[0])))
