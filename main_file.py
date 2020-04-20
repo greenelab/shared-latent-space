@@ -23,7 +23,7 @@ Date: 5/22/18
 
 import os
 
-import keras
+import tensorflow.keras as keras
 import numpy as np
 
 # Local files
@@ -38,15 +38,17 @@ from model_objects import model_parameters
 
 dataSetInfo = MNIST.dataInfo()
 
-if not os.path.exists(os.path.join('Data', 'Training',
-                                   '{}_Training.pkl'.format(dataSetInfo.
-                                                            name))):
-    unpackFiles(dataSetInfo.name)
+# if not os.path.exists(os.path.join('Data', 'Training',
+#                                    '{}_Training.pkl'.format(dataSetInfo.
+#                                                             name))):
+#     unpackFiles(dataSetInfo.name)
 
 (x_train, a_train, x_test, a_test) = dataSetInfo.load()
 
 if not os.path.exists(os.path.join('Output', dataSetInfo.name)):
-    os.mkdir(os.path.join('Output', dataSetInfo.name))
+    os.makedirs(os.path.join('Output', dataSetInfo.name))
+
+print((x_train.shape, a_train.shape))
 # second layer size, third layer size, encoded size, input size
 model_parameters = model_parameters(
     batchSize=256, numEpochs=1,
@@ -55,7 +57,7 @@ model_parameters = model_parameters(
     secondLayerSize=64,
     thirdLayerSize=32,
     encodedSize=16,
-    inputSizeRight=a_train.shape[1],
+    inputSizeRight=a_train.shape[0],
     firstLayerSizeRight=1024,
     dataSetInfo=dataSetInfo)
 

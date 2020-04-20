@@ -22,14 +22,14 @@ import os
 
 import numpy as np
 import matplotlib.pyplot as plt
-import keras
+import tensorflow.keras as keras
 
-from keras.models import Model
-from keras.layers import Dense, Activation, Lambda, Input
-from keras.optimizers import Adam
-from keras import backend as K
-from keras.callbacks import EarlyStopping
-from keras.utils import plot_model
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dense, Activation, Lambda, Input
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras import backend as K
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.utils import plot_model
 
 # Local files
 import ICVL
@@ -347,7 +347,7 @@ class shared_vae_class(object):
 
         # Take turns training each part of the model separately
         for i in range(self.params.numEpochs):
-            print("On EPOCH: " + repr(i + 1))
+            print(("On EPOCH: " + repr(i + 1)))
             self.centerModel.fit([leftDomain_noisy, rightDomain_noisy],
                                  [leftDomain, rightDomain],
                                  epochs=1,
@@ -415,10 +415,10 @@ class shared_vae_class(object):
                                 - np.absolute(rightToLeftCycle))
 
         # Print Average Cycle Differences
-        print("Left Cycle Difference: " +
-              repr(np.sum(leftCycleDifference) / leftDomain.shape[0]))
-        print("Right Cycle Difference: " +
-              repr(np.sum(rightCycleDifference) / leftDomain.shape[0]))
+        print(("Left Cycle Difference: " +
+              repr(np.sum(leftCycleDifference) / leftDomain.shape[0])))
+        print(("Right Cycle Difference: " +
+              repr(np.sum(rightCycleDifference) / leftDomain.shape[0])))
 
         # Create Noise
         leftRandomNoise = np.random.normal(
@@ -447,7 +447,7 @@ class shared_vae_class(object):
         rightCycleDifferenceNoise = (np.absolute(right_decoded_imgs_noise)
                                      - np.absolute(rightToLeftCycleNoise))
 
-        print("Left Cycle Noise Difference: " +
-              repr(np.sum(leftCycleDifferenceNoise) / leftDomain.shape[0]))
-        print("Right Cycle Noise Difference: " +
-              repr(np.sum(rightCycleDifferenceNoise) / leftDomain.shape[0]))
+        print(("Left Cycle Noise Difference: " +
+              repr(np.sum(leftCycleDifferenceNoise) / leftDomain.shape[0])))
+        print(("Right Cycle Noise Difference: " +
+              repr(np.sum(rightCycleDifferenceNoise) / leftDomain.shape[0])))

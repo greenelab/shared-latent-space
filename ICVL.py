@@ -14,7 +14,7 @@ Date: 5/22/18
 """
 
 import os
-import cPickle
+import pickle
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -23,7 +23,7 @@ import seaborn as sns
 # Local files
 from model_objects import model_parameters
 from DataSetInfoAbstractClass import dataSetInfoAbstract
-import cPickle
+import pickle
 
 
 class dataInfo(dataSetInfoAbstract):
@@ -56,10 +56,10 @@ class dataInfo(dataSetInfoAbstract):
         """
 
         with open(self.training_file, "rb") as fp:
-            (x_train, a_train) = cPickle.load(fp)
+            (x_train, a_train) = pickle.load(fp)
 
         with open(self.testing_file, "rb") as fp:
-            (x_test, a_test) = cPickle.load(fp)
+            (x_test, a_test) = pickle.load(fp)
         return (x_train, a_train, x_test, a_test)
 
     # This file plots the lines for the various fingers. This is all hardcoded
