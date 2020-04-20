@@ -48,7 +48,7 @@ dataSetInfo = MNIST.dataInfo()
 if not os.path.exists(os.path.join('Output', dataSetInfo.name)):
     os.makedirs(os.path.join('Output', dataSetInfo.name))
 
-print(x_train.shape, a_train.shape)
+print((x_train.shape, a_train.shape))
 # second layer size, third layer size, encoded size, input size
 model_parameters = model_parameters(
     batchSize=256, numEpochs=1,
