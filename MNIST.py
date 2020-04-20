@@ -14,7 +14,7 @@ Date: 5/22/18
 """
 
 import os
-import cPickle
+import pickle
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -26,7 +26,7 @@ from keras.datasets import mnist
 # Local Files
 from model_objects import model_parameters
 from DataSetInfoAbstractClass import dataSetInfoAbstract
-import cPickle
+import pickle
 import gzip
 
 
@@ -65,7 +65,9 @@ class dataInfo(dataSetInfoAbstract):
         # with open(self.testing_file, "rb") as fp:
         #     (x_test, a_test) = cPickle.load(fp)
         f = gzip.open('mnist.pkl.gz', 'rb')
-        train, val, test = cPickle.load(f)
+        u = pickle._Unpickler(f)
+        u.encoding = 'latin1'
+        train, val, test = u.load()
         x_train, a_train = train
         x_test, a_test = test
         return (x_train, a_train, x_test, a_test)
